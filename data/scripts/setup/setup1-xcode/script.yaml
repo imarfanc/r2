@@ -1,0 +1,5 @@
+name: Command Line Tools
+note: Installs Xcode CLT via softwareupdate, or verifies if already present.
+path: setup-xcode.sh
+group: setup
+section: 1

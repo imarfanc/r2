@@ -1,0 +1,5 @@
+name: Prime sieve
+note: Sieve of Eratosthenes under 200, printed as rich columns.
+path: primes.py
+group: demo
+section: Rendering

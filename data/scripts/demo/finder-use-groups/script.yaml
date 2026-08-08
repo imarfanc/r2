@@ -1,0 +1,5 @@
+name: Finder use groups
+note: Toggles View › Use Groups in Finder by driving the menu bar — needs Accessibility.
+path: use-groups.applescript
+group: demo
+section: macOS

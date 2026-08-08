@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "tasks": {
+    "check": {
+      "group": "check",
+      "description": "Run structural, format, lint, type, and test checks"
+    },
+    "dev": {
+      "group": "run",
+      "description": "Run the web app with file watching"
+    },
+    "dev:open": {
+      "group": "run",
+      "description": "Run the web app and open it in Helium"
+    },
+    "start": {
+      "group": "run",
+      "description": "Run the web app"
+    },
+    "fmt": {
+      "group": "check",
+      "description": "Format repository files"
+    },
+    "fmt:check": {
+      "group": "check",
+      "description": "Verify repository formatting"
+    },
+    "lint": {
+      "group": "check",
+      "description": "Lint repository source"
+    },
+    "typecheck": {
+      "group": "check",
+      "description": "Type-check active TypeScript source"
+    },
+    "test": {
+      "group": "check",
+      "description": "Run Deno tests"
+    },
+    "skills": {
+      "group": "repo",
+      "description": "Preview and interactively reconcile skill links"
+    },
+    "skills:all": {
+      "group": "repo",
+      "description": "Apply the skill manifest"
+    },
+    "skills:check": {
+      "group": "repo",
+      "description": "Fail when skill links drift"
+    },
+    "skills:links": {
+      "group": "repo",
+      "description": "List managed skill links"
+    },
+    "rename": {
+      "group": "repo",
+      "description": "Rename the project across state, headings, and source"
+    }
+  }
+}

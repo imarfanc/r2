@@ -1,0 +1,5 @@
+name: Failing job
+note: Writes to stderr and exits 3 — tests error handling and exit codes.
+path: fail.sh
+group: demo
+section: Errors

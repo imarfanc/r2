@@ -1,0 +1,5 @@
+name: Service health
+note: Renders a rich table of randomised service stats.
+path: table.py
+group: demo
+section: Rendering

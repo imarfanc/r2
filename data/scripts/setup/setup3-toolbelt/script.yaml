@@ -1,0 +1,5 @@
+name: Toolbelt check
+note: Lists which command line tools are already here with their version, path and whether they came from Homebrew or from macOS, then builds one brew install line for the rest.
+path: setup-toolbelt.ts
+group: setup
+section: 3-Packages

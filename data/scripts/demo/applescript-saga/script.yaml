@@ -1,0 +1,5 @@
+name: AppleScript saga
+note: A long, self-contained AppleScript that audits lists, dates, and text — no GUI apps required.
+path: run.sh
+group: demo
+section: Scripting

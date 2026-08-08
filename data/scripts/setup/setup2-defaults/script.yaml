@@ -1,0 +1,5 @@
+name: Finder and keyboard defaults
+note: Reads the current value of 78 reversible defaults — Finder columns, fast key repeat, Dock auto-hide, dwell corners, software updates, screenshots and scroll-to-zoom — applies and verifies them, then restarts Finder, the Dock and SystemUIServer. Pass --check to look without touching anything.
+path: setup-defaults.ts
+group: setup
+section: 2-macOS

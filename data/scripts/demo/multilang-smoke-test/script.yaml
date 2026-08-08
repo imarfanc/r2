@@ -1,0 +1,5 @@
+name: Multi-language smoke test
+note: Checks dependencies, then runs snippets in Zsh, Python (uv), Deno, and AppleScript.
+path: run.sh
+group: demo
+section: Checks

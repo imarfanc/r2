@@ -1,0 +1,5 @@
+name: Homebrew
+note: Reports the Homebrew version, prefix and package counts, then lists every outdated formula and cask with its installed and available version side by side, and finishes with brew doctor.
+path: setup-homebrew.ts
+group: setup
+section: 3-Packages

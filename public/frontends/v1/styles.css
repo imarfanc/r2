@@ -1,0 +1,854 @@
+/* v1 — rail and console. A pinned index on the left, one wide terminal on the
+   right: the layout of a tool you keep open, not a page you visit. */
+
+/* ── Tokens ─────────────────────────────────────────────────────────────
+   One hue (graphite), lightness only. Amber is the lamp glow of a
+   terminal — the single accent, kept under ~10% of the surface.        */
+
+:root {
+  --bg: #12151c;
+  --surface: #1a1f2b;
+  --surface-raised: #222836;
+  --console: #0d1117;
+
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.13);
+
+  --text: #e8e6e1;
+  --text-secondary: #b6bccb;
+  --text-muted: #8b93a8;
+  --text-faint: #626c82;
+
+  --accent: #f4a261;
+  --accent-dim: #c47d3a;
+  --ok: #6bcb77;
+  --fail: #e85d5d;
+  --led-idle: #414b60;
+
+  --rail-w: 20rem;
+  --radius-sm: 5px;
+  --radius-md: 8px;
+
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+}
+
+/* ── Shell: rail + console ───────────────────────────────────────────── */
+
+.runbook {
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  /* An implicit `auto` row would size to content and blow past 100dvh,
+     which pushes the scroll onto the page and kills both inner scrollers. */
+  grid-template-rows: minmax(0, 1fr);
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* The header is pinned; only .rail-scroll moves. */
+  overflow: hidden;
+  border-right: 1px solid var(--border);
+  background:
+    radial-gradient(ellipse 120% 30% at 0% 0%, rgba(244, 162, 97, 0.06), transparent),
+    var(--bg);
+}
+
+/* ── Rail header ─────────────────────────────────────────────────────── */
+
+.rail-head {
+  flex: none;
+  padding: 28px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.rail-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.rail-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.rail-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border: 2px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+
+.rail-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--led-idle);
+  background-clip: content-box;
+}
+
+.rail-eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 6px;
+}
+
+.rail-title {
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0 0 8px;
+  text-wrap: balance;
+}
+
+.rail-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.rail-lede {
+  color: var(--text-muted);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.rail-nav {
+  display: flex;
+  gap: 6px;
+  margin-top: 18px;
+}
+
+.rail-nav a {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  color: var(--text-muted);
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  transition:
+    color 0.15s cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 0.15s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.rail-nav a:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.rail-nav a[aria-current="page"] {
+  color: var(--accent);
+  border-color: var(--accent-dim);
+  background: rgba(244, 162, 97, 0.08);
+}
+
+.rail-nav a:focus-visible,
+.rail-row:focus-visible,
+.run-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── Rail list ───────────────────────────────────────────────────────── */
+
+.rail-section:last-child {
+  padding-bottom: 20px;
+}
+
+/* Section headings sit in the gap, not on a fill — the rail stays quiet. */
+.rail-section-label {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 0;
+  padding: 18px 18px 6px;
+}
+
+.rail-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.rail-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+  padding: 9px 10px;
+  min-height: 40px;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.12s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.rail-row:hover {
+  background: var(--surface);
+}
+
+.rail-row[aria-current] {
+  background: var(--surface-raised);
+}
+
+.rail-row:active {
+  transform: scale(0.99);
+}
+
+.rail-led {
+  width: 7px;
+  height: 7px;
+  /* optically centred on the name's cap height, not its line box */
+  margin-top: 6px;
+  border-radius: 50%;
+  background: var(--led-idle);
+  transition:
+    background 0.2s,
+    box-shadow 0.2s;
+}
+
+.rail-row[data-state="running"] .rail-led {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.rail-row[data-state="done"] .rail-led {
+  background: var(--ok);
+  box-shadow: 0 0 6px rgba(107, 203, 119, 0.45);
+}
+
+.rail-row[data-state="error"] .rail-led {
+  background: var(--fail);
+  box-shadow: 0 0 6px rgba(232, 93, 93, 0.45);
+}
+
+.rail-text {
+  display: block;
+  min-width: 0;
+}
+
+.rail-name {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+.rail-row[aria-current] .rail-name {
+  color: var(--text);
+}
+
+.rail-code {
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: var(--text-faint);
+  align-self: center;
+}
+
+.rail-row[data-state="error"] .rail-code {
+  color: var(--fail);
+}
+
+.rail-message {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0 16px;
+  padding: 20px 0;
+}
+
+.rail-message.is-error {
+  color: var(--fail);
+}
+
+/* ── Console: the focal surface ──────────────────────────────────────── */
+
+.console {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--console);
+}
+
+.console-head {
+  flex: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.console-id {
+  min-width: 0;
+}
+
+.console-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.console-name {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.3;
+  flex: none;
+}
+
+.console-path {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  color: var(--text-faint);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.console-note {
+  font-size: 12px;
+  color: var(--text-faint);
+  margin: 4px 0 0;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.console-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.status-running {
+  color: var(--accent);
+}
+
+.console[data-state="done"] .status-code {
+  color: var(--ok);
+}
+
+.console[data-state="error"] .status-code {
+  color: var(--fail);
+}
+
+.status-time {
+  color: var(--text-faint);
+}
+
+.run-button {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  height: 32px;
+  padding: 0 16px;
+  color: #1a1206;
+  background: var(--accent);
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.15s cubic-bezier(0.23, 1, 0.32, 1),
+    transform 0.1s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.run-button:hover:not(:disabled) {
+  background: #ffb877;
+}
+
+.run-button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.run-button:disabled {
+  color: var(--text-faint);
+  background: var(--surface-raised);
+  cursor: not-allowed;
+}
+
+.console-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-sm);
+}
+
+.view-toggle button {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  height: 26px;
+  padding: 0 10px;
+  color: var(--text-faint);
+  background: transparent;
+  border: 0;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: color 0.12s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.view-toggle button:hover {
+  color: var(--text);
+}
+
+.view-toggle button[aria-selected="true"] {
+  color: var(--text);
+  background: var(--surface-raised);
+}
+
+.view-toggle button:focus-visible,
+.icon-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.icon-button {
+  font-size: 14px;
+  line-height: 1;
+  height: 32px;
+  width: 32px;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    color 0.15s cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 0.15s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.icon-button:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.icon-button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.icon-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.console-notice {
+  flex: none;
+  margin: 0;
+  padding: 10px 18px;
+  font-size: 12px;
+  color: var(--fail);
+  background: rgba(232, 93, 93, 0.08);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Only appears when a script has siblings — a lone file gets no chrome. */
+.file-tabs {
+  flex: none;
+  display: flex;
+  gap: 2px;
+  padding: 8px 14px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.file-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.file-tabs button {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  height: 26px;
+  padding: 0 10px;
+  white-space: nowrap;
+  color: var(--text-faint);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color 0.12s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.file-tabs button:hover {
+  color: var(--text);
+}
+
+.file-tabs button[aria-selected="true"] {
+  color: var(--accent);
+  background: rgba(244, 162, 97, 0.1);
+}
+
+.file-tabs button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* The highlighter emits inline spans carrying token classes; the surrounding
+   typography stays ours so the user's font and size prefs still apply. */
+.console-source code {
+  font: inherit;
+  color: var(--text-secondary);
+}
+
+/* ── Typography settings popover ─────────────────────────────────────── */
+
+.settings {
+  position: relative;
+}
+
+.settings-trigger {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  height: 32px;
+  width: 32px;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    color 0.15s cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 0.15s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.settings-trigger:hover,
+.settings-trigger[aria-expanded="true"] {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.settings-trigger:focus-visible,
+.settings-option:focus-within,
+.settings-size:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.settings-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 10;
+  width: 15rem;
+  padding: 12px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  transform-origin: top right;
+  animation: pop 0.15s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.settings-group {
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+}
+
+.settings-group legend {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 0 0 6px;
+}
+
+.settings-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.settings-option:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.settings-option input,
+.settings-size input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.settings-option:has(input:checked) {
+  color: var(--accent);
+}
+
+.settings-sizes {
+  display: flex;
+  gap: 4px;
+}
+
+.settings-size {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 28px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.settings-size:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.settings-size:has(input:checked) {
+  color: #1a1206;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.settings-preview {
+  margin: 0;
+  padding: 10px;
+  line-height: 1;
+  white-space: pre;
+  overflow: hidden;
+  color: #e6edf3;
+  background: var(--console);
+  border-radius: var(--radius-sm);
+}
+
+.console-out {
+  /* font-family and font-size come from user prefs (inline style).
+     line-height must stay exactly 1 — box-drawing glyphs only join
+     seamlessly when the line box equals the glyph em. */
+  line-height: 1;
+  color: #e6edf3;
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 16px 18px 32px;
+  white-space: pre;
+  tab-size: 4;
+  font-variant-ligatures: none;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.console-out::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.console-out::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+
+.console-out .ansi-bold {
+  font-weight: 700;
+}
+
+.console-out .ansi-dim {
+  opacity: 0.72;
+}
+
+.console-out .ansi-italic {
+  font-style: italic;
+}
+
+.console-out.is-running::after {
+  content: "▌";
+  color: var(--accent);
+  animation: blink 1s step-end infinite;
+}
+
+.console-hint {
+  color: var(--text-faint);
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+
+.console-hint--center {
+  display: grid;
+  place-content: center;
+  height: 100%;
+  margin: 0;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ── Narrow: stack the rail above the console ────────────────────────── */
+
+@media (max-width: 60rem) {
+  .runbook {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .console {
+    overflow: visible;
+  }
+
+  .rail {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    overflow: visible;
+  }
+
+  /* One page scroll on narrow screens — a nested one here would trap the wheel. */
+  .rail-scroll {
+    overflow: visible;
+  }
+
+  .rail-head {
+    border-bottom: 0;
+  }
+
+  .console {
+    min-height: 60dvh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ── Version switcher ────────────────────────────────────────────────── */
+
+.rail-versions {
+  display: flex;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.rail-versions a {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--text-faint);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.rail-versions a:hover {
+  color: var(--text);
+}
+
+.rail-versions a[aria-current="page"] {
+  color: var(--text);
+  background: var(--surface-raised);
+}

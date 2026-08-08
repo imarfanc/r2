@@ -1,0 +1,5 @@
+name: Curl installers
+note: The tools that install themselves from a URL rather than from Homebrew — vp, bun, deno, nvm, rustup, opencode, claude, codex, atuin and pnpm. Reports version, path and whether each is on your PATH, and prints the install line for the rest. Pass --install to be walked through them one at a time.
+path: setup-curl.ts
+group: setup
+section: 3-Packages

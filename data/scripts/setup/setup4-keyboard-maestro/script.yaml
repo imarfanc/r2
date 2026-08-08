@@ -1,0 +1,5 @@
+name: Keyboard Maestro defaults
+note: Stops the engine so the writes are not overwritten, enables the Applications Palette and the Command status menu icon, then restarts the engine. Launch Engine at Login is left to you — automating that window is slow and version-specific. Pass --check to inspect without changing anything.
+path: setup-keyboard-maestro.ts
+group: setup
+section: 4-macOS-Apps

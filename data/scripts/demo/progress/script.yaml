@@ -1,0 +1,5 @@
+name: Build progress
+note: Streams staged build steps with rich rules and status markers.
+path: progress.py
+group: demo
+section: Streaming

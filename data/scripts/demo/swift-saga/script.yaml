@@ -1,0 +1,5 @@
+name: Swift saga
+note: A long Swift script that audits lists, dates, text, and numbers — compiled and run via swift.
+path: run.sh
+group: demo
+section: Scripting

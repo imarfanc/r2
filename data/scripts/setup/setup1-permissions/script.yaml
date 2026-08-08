@@ -1,0 +1,5 @@
+name: macOS permissions
+note: Triggers the Files, Automation, Accessibility and Full Disk Access prompts one at a time, so later scripts are not halted by a dialog nobody is watching.
+path: setup-permissions.sh
+group: setup
+section: 1

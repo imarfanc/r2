@@ -1,0 +1,5 @@
+name: Reset home folder
+note: Backs up your shell config, records an inventory, moves the contents of Desktop, Documents, Downloads, Movies, Music and Public to the Trash, then rebuilds your folder scaffold, Dock spacers and Finder windows. Everything is configured in reset.yaml. Nothing is cleared without --wipe and a typed confirmation; the default run only reports.
+path: setup-reset.ts
+group: setup
+section: 4-Reset

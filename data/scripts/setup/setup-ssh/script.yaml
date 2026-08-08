@@ -1,0 +1,5 @@
+name: SSH key
+note: Creates an ed25519 key if you have none, sets ~/.ssh/config so macOS remembers the passphrase, loads the key into the agent, copies the public half to the clipboard, then verifies the lot against ssh itself and a live connection to GitHub. See README.md for what any of that means. Pass --check to look without changing anything.
+path: setup-ssh.ts
+group: setup
+section: Credentials

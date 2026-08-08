@@ -1,0 +1,5 @@
+name: Countdown
+note: Emits a line every 600ms — good for checking live output streaming.
+path: countdown.sh
+group: demo
+section: Streaming

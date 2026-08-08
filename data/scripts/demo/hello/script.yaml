@@ -1,0 +1,5 @@
+name: System snapshot
+note: Prints host, kernel, user and disk usage for the dev machine.
+path: hello.sh
+group: demo
+section: Checks

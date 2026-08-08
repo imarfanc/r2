@@ -1,0 +1,598 @@
+/* v2 — the stacked deck. Where v1 pins an index down the left edge, v2 puts the
+   whole group on one line of chips and gives the rest of the screen to output:
+   fewer scripts in view, more of the thing you actually came to read.
+   All mono, square corners, one cool accent. */
+
+:root {
+  --paper: #08090c;
+  --panel: #0e1015;
+  --panel-raised: #14171e;
+  --rule: #1e222b;
+  --rule-strong: #2b313d;
+
+  --ink: #e4e8ef;
+  --ink-2: #a8b0be;
+  --ink-3: #6c7585;
+  --ink-4: #464e5c;
+
+  --cyan: #6fd6c4;
+  --cyan-dim: #2f6b62;
+  --ok: #7fd48a;
+  --fail: #ef7d7d;
+
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--paper);
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+}
+
+.deck {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ── Command bar ─────────────────────────────────────────────────────── */
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 16px;
+  height: 44px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--panel);
+}
+
+.prompt {
+  color: var(--cyan);
+  font-weight: 700;
+}
+
+.bar-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.bar-title em {
+  font-style: normal;
+  color: var(--cyan);
+}
+
+.bar-spacer {
+  flex: 1;
+}
+
+.tabs,
+.versions {
+  display: flex;
+  gap: 1px;
+}
+
+.tabs a,
+.versions a {
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 4px 10px;
+  border: 1px solid transparent;
+}
+
+.tabs a:hover,
+.versions a:hover {
+  color: var(--ink);
+}
+
+.tabs a[aria-current="page"] {
+  color: var(--cyan);
+  border-color: var(--cyan-dim);
+}
+
+.versions a[aria-current="page"] {
+  color: var(--ink);
+  background: var(--panel-raised);
+}
+
+.tabs a:focus-visible,
+.versions a:focus-visible,
+.chip:focus-visible,
+.act:focus-visible,
+.go:focus-visible,
+.filter:focus-visible {
+  outline: 1px solid var(--cyan);
+  outline-offset: 1px;
+}
+
+/* ── Picker ──────────────────────────────────────────────────────────── */
+
+.picker {
+  border-bottom: 1px solid var(--rule);
+  background:
+    linear-gradient(to bottom, rgba(111, 214, 196, 0.03), transparent 60%),
+    var(--paper);
+  max-height: 42dvh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule-strong) transparent;
+}
+
+.picker-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 14px 16px 8px;
+}
+
+.picker-head h2 {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+.picker-lede {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.filter {
+  font: inherit;
+  font-size: 12px;
+  width: 11rem;
+  padding: 4px 8px;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule-strong);
+  border-radius: 0;
+}
+
+.filter::placeholder {
+  color: var(--ink-4);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 16px 16px;
+}
+
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.chip-label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  width: 100%;
+  padding-top: 10px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: inherit;
+  font-size: 12px;
+  padding: 5px 10px;
+  color: var(--ink-2);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  cursor: pointer;
+  transition: border-color 0.12s ease, color 0.12s ease;
+}
+
+.chip:hover {
+  color: var(--ink);
+  border-color: var(--rule-strong);
+}
+
+.chip[aria-current] {
+  color: var(--ink);
+  border-color: var(--cyan-dim);
+  background: var(--panel-raised);
+}
+
+.chip-dot {
+  width: 5px;
+  height: 5px;
+  background: var(--ink-4);
+}
+
+.chip[data-state="running"] .chip-dot {
+  background: var(--cyan);
+  animation: blink 1s step-end infinite;
+}
+
+.chip[data-state="done"] .chip-dot {
+  background: var(--ok);
+}
+
+.chip[data-state="error"] .chip-dot {
+  background: var(--fail);
+}
+
+.note {
+  padding: 18px 16px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.note.is-error {
+  color: var(--fail);
+}
+
+/* ── Stage ───────────────────────────────────────────────────────────── */
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--panel);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: none;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.meta-name {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.meta-path {
+  font-size: 11px;
+  color: var(--ink-4);
+}
+
+.meta-note {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta-status {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.stage[data-state="running"] .meta-status {
+  color: var(--cyan);
+}
+
+.stage[data-state="done"] .meta-status {
+  color: var(--ok);
+}
+
+.stage[data-state="error"] .meta-status {
+  color: var(--fail);
+}
+
+.act {
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  height: 26px;
+  padding: 0 9px;
+  color: var(--ink-3);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  cursor: pointer;
+  transition: color 0.12s ease, border-color 0.12s ease;
+}
+
+.act:hover:not(:disabled) {
+  color: var(--ink);
+  border-color: var(--rule-strong);
+}
+
+.act[aria-selected="true"] {
+  color: var(--cyan);
+  border-color: var(--cyan-dim);
+}
+
+.act:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.go {
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  height: 26px;
+  padding: 0 14px;
+  color: #04100e;
+  background: var(--cyan);
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.go:hover:not(:disabled) {
+  background: #8fe6d6;
+}
+
+.go:disabled {
+  color: var(--ink-4);
+  background: var(--panel-raised);
+  cursor: not-allowed;
+}
+
+.files {
+  flex: none;
+  display: flex;
+  gap: 1px;
+  padding: 8px 16px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.files::-webkit-scrollbar {
+  display: none;
+}
+
+.files button {
+  font: inherit;
+  font-size: 11px;
+  height: 24px;
+  padding: 0 9px;
+  white-space: nowrap;
+  color: var(--ink-4);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.files button:hover {
+  color: var(--ink);
+}
+
+.files button[aria-selected="true"] {
+  color: var(--cyan);
+  border-bottom: 1px solid var(--cyan-dim);
+}
+
+.out {
+  /* font-family and font-size come from the reader's prefs (inline style).
+     line-height must stay exactly 1 — box-drawing glyphs only join seamlessly
+     when the line box equals the glyph em. */
+  line-height: 1;
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 16px 16px 32px;
+  color: #e6edf3;
+  background: #0d1117;
+  white-space: pre;
+  tab-size: 4;
+  font-variant-ligatures: none;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule-strong) transparent;
+}
+
+.out code {
+  font: inherit;
+  color: var(--ink-2);
+}
+
+.out.is-running::after {
+  content: "▌";
+  color: var(--cyan);
+  animation: blink 1s step-end infinite;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--ink-4);
+}
+
+.stage-empty {
+  display: grid;
+  place-content: center;
+  height: 100%;
+  color: var(--ink-4);
+  font-size: 12px;
+}
+
+.alert {
+  flex: none;
+  margin: 0;
+  padding: 8px 16px;
+  font-size: 11px;
+  color: var(--fail);
+  border-bottom: 1px solid var(--rule);
+  background: rgba(239, 125, 125, 0.07);
+}
+
+/* ── Typography popover ──────────────────────────────────────────────── */
+
+.type {
+  position: relative;
+}
+
+.type-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 10;
+  width: 14rem;
+  padding: 10px;
+  background: var(--panel-raised);
+  border: 1px solid var(--rule-strong);
+}
+
+.type-menu fieldset {
+  margin: 0 0 10px;
+  padding: 0;
+  border: 0;
+}
+
+.type-menu legend {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  padding: 0 0 4px;
+}
+
+.type-option {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 6px;
+  font-size: 12px;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.type-option:hover {
+  color: var(--ink);
+  background: var(--panel);
+}
+
+.type-option:has(input:checked) {
+  color: var(--cyan);
+}
+
+.type-option input,
+.type-size input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.type-sizes {
+  display: flex;
+  gap: 3px;
+}
+
+.type-size {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 24px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+  border: 1px solid var(--rule);
+  cursor: pointer;
+}
+
+.type-size:has(input:checked) {
+  color: #04100e;
+  background: var(--cyan);
+  border-color: var(--cyan);
+}
+
+.type-preview {
+  margin: 0;
+  padding: 8px;
+  line-height: 1;
+  white-space: pre;
+  overflow: hidden;
+  color: #e6edf3;
+  background: #0d1117;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ── Narrow ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 48rem) {
+  .deck {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .picker {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .picker-head {
+    flex-wrap: wrap;
+  }
+
+  .meta {
+    flex-wrap: wrap;
+  }
+
+  .out {
+    min-height: 55dvh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

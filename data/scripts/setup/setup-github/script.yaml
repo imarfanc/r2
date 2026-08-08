@@ -1,0 +1,5 @@
+name: GitHub CLI
+note: Checks gh is installed and signed in, signs you in when run from a real terminal, then verifies the account, token scopes, git protocol, commit identity, and whether this Mac's SSH key is actually on your GitHub account. Pass --check to look without changing anything.
+path: setup-github.ts
+group: setup
+section: Credentials

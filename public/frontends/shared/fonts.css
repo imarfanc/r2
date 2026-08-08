@@ -1,0 +1,84 @@
+/* UI faces only. Google Fonts subsets its files by unicode-range and the
+   box-drawing block (U+2500–257F) is in NONE of those subsets — so any mono
+   loaded from Google silently falls back to a system font for ╭─│┼ etc.,
+   which is why tables and boxes never line up. The monos below are loaded as
+   complete, unsubsetted woff2 from jsDelivr instead. */
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap");
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/JetBrains/JetBrainsMono@2.304/fonts/webfonts/JetBrainsMono-Regular.woff2")
+    format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-weight: 500;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/JetBrains/JetBrainsMono@2.304/fonts/webfonts/JetBrainsMono-Medium.woff2")
+    format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-weight: 700;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/JetBrains/JetBrainsMono@2.304/fonts/webfonts/JetBrainsMono-Bold.woff2")
+    format("woff2");
+}
+
+@font-face {
+  font-family: "Fira Code";
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/npm/firacode@6.2.0/distr/woff2/FiraCode-Regular.woff2")
+    format("woff2");
+}
+
+@font-face {
+  font-family: "Fira Code";
+  font-weight: 700;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/npm/firacode@6.2.0/distr/woff2/FiraCode-Bold.woff2")
+    format("woff2");
+}
+
+/* Syntax tokens for the source view, shared by every frontend version. */
+.tok-comment {
+  color: #7b8496;
+  font-style: italic;
+}
+
+.tok-string {
+  color: #9ecb8a;
+}
+
+.tok-number {
+  color: #d3a2f0;
+}
+
+.tok-keyword {
+  color: #f0a8c0;
+}
+
+.tok-variable {
+  color: #8ec7f0;
+}
+
+.tok-key {
+  color: #f4c07a;
+}
+
+.ansi-bold {
+  font-weight: 700;
+}
+
+.ansi-dim {
+  opacity: 0.65;
+}
+
+.ansi-italic {
+  font-style: italic;
+}
