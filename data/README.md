@@ -16,4 +16,4 @@ data/scripts/demo/hello/
 
 Every readable file in the directory appears in the browser's source view, entry point first and `script.yaml` last. Files above 256 KB are skipped as data rather than code.
 
-`_common.sh` and `_common.ts` sit at the top of `scripts/` as shared helpers; they are not scripts themselves and never appear in a group listing.
+`_common.sh`, `_common.ts` and `_brew-packages.sh` sit at the top of `scripts/` as shared helpers: output styling for the first two, and the expected Homebrew set for the third, read by both the inventory and install scripts so they cannot disagree about it. Files at this level are not scripts and never appear in a group listing — only directories holding a `script.yaml` do.

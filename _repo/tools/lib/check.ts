@@ -2,6 +2,7 @@ import { dirname, extname, join, relative, resolve } from "@std/path";
 
 import { loadDenoConfig, loadSkillManifest, loadState, loadTaskCatalog } from "./config.ts";
 import { fileExists, pathExists, walkFiles } from "./fs.ts";
+import { isContentPath } from "./paths.ts";
 import { planSkillLinks } from "./skills.ts";
 import { type Diagnostic, SCHEMA_VERSION } from "./types.ts";
 
@@ -19,19 +20,6 @@ const FORBIDDEN_ROOT_FILES = [
   "vite.config.ts",
   "justfile",
 ];
-
-/**
- * Directories holding content the repository runs but does not author: the
- * scripts under `data/` belong to whoever wrote them and are launched by their
- * own runtimes (bash, uv, bun, osascript). Policing them for Deno-only imports
- * or for home paths would be checking the wrong thing, so the content checks
- * step over them — the same reasoning that excludes them from fmt and lint.
- */
-const CONTENT_DIRS = ["data"];
-
-function isContent(relativePath: string): boolean {
-  return CONTENT_DIRS.some((dir) => relativePath === dir || relativePath.startsWith(`${dir}/`));
-}
 
 export async function structuralChecks(root: string): Promise<Diagnostic[]> {
   const results: Diagnostic[] = [];
@@ -115,7 +103,7 @@ async function checkLinksAndPaths(root: string, out: Diagnostic[]): Promise<void
       }
       continue;
     }
-    if (isContent(relativePath)) continue;
+    if (isContentPath(relativePath)) continue;
     if (!stat.isFile || !textExtensions.has(extname(path)) && !path.endsWith(".env.example")) {
       continue;
     }
@@ -183,7 +171,7 @@ async function checkRootContract(root: string, out: Diagnostic[]): Promise<void>
   const nodeImports: string[] = [];
   for await (const path of walkFiles(root)) {
     const relativePath = relative(root, path);
-    if (isContent(relativePath)) continue;
+    if (isContentPath(relativePath)) continue;
     if (FORBIDDEN_ROOT_FILES.includes(path.split("/").at(-1) ?? "")) {
       forbidden.push(relativePath);
     }

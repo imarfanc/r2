@@ -1,12 +1,14 @@
-/* v2 — the stacked deck. Where v1 pins an index down the left edge, v2 puts the
-   whole group on one line of chips and gives the rest of the screen to output:
-   fewer scripts in view, more of the thing you actually came to read.
-   All mono, square corners, one cool accent. */
+/* v2 — the same rail-and-console layout as v1, read in a different voice.
+   Where v1 is warm and typographic (serif headings, amber lamp, soft corners),
+   v2 is cool and instrumental: all mono, square corners, hairline rules, one
+   cyan accent, and a filter over the index. Same shape, different temperature. */
 
 :root {
   --paper: #08090c;
   --panel: #0e1015;
   --panel-raised: #14171e;
+  --console: #0d1117;
+
   --rule: #1e222b;
   --rule-strong: #2b313d;
 
@@ -21,6 +23,7 @@
   --fail: #ef7d7d;
 
   --mono: "JetBrains Mono", ui-monospace, monospace;
+  --rail-w: 20rem;
 
   font-family: var(--mono);
   font-size: 13px;
@@ -42,51 +45,84 @@ body {
   min-height: 100dvh;
 }
 
+/* ── Shell: rail + stage ─────────────────────────────────────────────── */
+
 .deck {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  /* An implicit `auto` row would size to content and blow past 100dvh, which
+     pushes the scroll onto the page and kills both inner scrollers. */
+  grid-template-rows: minmax(0, 1fr);
   height: 100dvh;
   overflow: hidden;
 }
 
-/* ── Command bar ─────────────────────────────────────────────────────── */
-
-.bar {
+.rail {
   display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 0 16px;
-  height: 44px;
-  border-bottom: 1px solid var(--rule);
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border-right: 1px solid var(--rule);
   background: var(--panel);
+}
+
+/* ── Rail header ─────────────────────────────────────────────────────── */
+
+.rail-head {
+  flex: none;
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.eyebrow {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0 0 10px;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-4);
 }
 
 .prompt {
   color: var(--cyan);
   font-weight: 700;
+  letter-spacing: 0;
 }
 
-.bar-title {
-  margin: 0;
-  font-size: 13px;
+.rail-title {
+  margin: 0 0 8px;
+  font-size: 18px;
   font-weight: 500;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
 }
 
-.bar-title em {
+.rail-title em {
   font-style: normal;
   color: var(--cyan);
 }
 
-.bar-spacer {
-  flex: 1;
+.rail-lede {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-3);
+  text-wrap: pretty;
 }
 
 .tabs,
 .versions {
   display: flex;
   gap: 1px;
+}
+
+.tabs {
+  margin-top: 14px;
+}
+
+.versions {
+  margin-top: 10px;
 }
 
 .tabs a,
@@ -110,68 +146,25 @@ body {
   border-color: var(--cyan-dim);
 }
 
+.versions a {
+  padding: 3px 8px;
+  font-size: 10px;
+  color: var(--ink-4);
+}
+
 .versions a[aria-current="page"] {
   color: var(--ink);
   background: var(--panel-raised);
 }
 
-.tabs a:focus-visible,
-.versions a:focus-visible,
-.chip:focus-visible,
-.act:focus-visible,
-.go:focus-visible,
-.filter:focus-visible {
-  outline: 1px solid var(--cyan);
-  outline-offset: 1px;
-}
-
-/* ── Picker ──────────────────────────────────────────────────────────── */
-
-.picker {
-  border-bottom: 1px solid var(--rule);
-  background:
-    linear-gradient(to bottom, rgba(111, 214, 196, 0.03), transparent 60%),
-    var(--paper);
-  max-height: 42dvh;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--rule-strong) transparent;
-}
-
-.picker-head {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  padding: 14px 16px 8px;
-}
-
-.picker-head h2 {
-  margin: 0;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--ink-4);
-}
-
-.picker-lede {
-  margin: 0;
-  flex: 1;
-  min-width: 0;
-  font-size: 12px;
-  color: var(--ink-3);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .filter {
   font: inherit;
   font-size: 12px;
-  width: 11rem;
-  padding: 4px 8px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 5px 8px;
   color: var(--ink);
-  background: var(--panel);
+  background: var(--paper);
   border: 1px solid var(--rule-strong);
   border-radius: 0;
 }
@@ -180,77 +173,129 @@ body {
   color: var(--ink-4);
 }
 
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 4px 16px 16px;
+.tabs a:focus-visible,
+.versions a:focus-visible,
+.filter:focus-visible,
+.row:focus-visible,
+.act:focus-visible,
+.go:focus-visible {
+  outline: 1px solid var(--cyan);
+  outline-offset: 1px;
 }
 
-.chip-group {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  width: 100%;
+/* ── Rail list ───────────────────────────────────────────────────────── */
+
+.rail-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule-strong) transparent;
 }
 
-.chip-label {
+.rail-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.rail-scroll::-webkit-scrollbar-thumb {
+  background: var(--rule-strong);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.rail-section:last-child {
+  padding-bottom: 16px;
+}
+
+.rail-section-label {
+  margin: 0;
+  padding: 16px 16px 5px;
   font-size: 10px;
+  font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-4);
-  width: 100%;
-  padding-top: 10px;
 }
 
-.chip {
-  display: inline-flex;
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  min-height: 32px;
+  padding: 6px 16px;
   font: inherit;
   font-size: 12px;
-  padding: 5px 10px;
+  text-align: left;
   color: var(--ink-2);
-  background: var(--panel);
-  border: 1px solid var(--rule);
+  background: transparent;
+  border: 0;
+  border-left: 2px solid transparent;
   border-radius: 0;
   cursor: pointer;
-  transition: border-color 0.12s ease, color 0.12s ease;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
-.chip:hover {
+.row:hover {
   color: var(--ink);
-  border-color: var(--rule-strong);
-}
-
-.chip[aria-current] {
-  color: var(--ink);
-  border-color: var(--cyan-dim);
   background: var(--panel-raised);
 }
 
-.chip-dot {
+.row[aria-current] {
+  color: var(--ink);
+  background: var(--panel-raised);
+  border-left-color: var(--cyan);
+}
+
+.row-dot {
   width: 5px;
   height: 5px;
   background: var(--ink-4);
+  transition: background 0.2s;
 }
 
-.chip[data-state="running"] .chip-dot {
+.row[data-state="running"] .row-dot {
   background: var(--cyan);
   animation: blink 1s step-end infinite;
 }
 
-.chip[data-state="done"] .chip-dot {
+.row[data-state="done"] .row-dot {
   background: var(--ok);
 }
 
-.chip[data-state="error"] .chip-dot {
+.row[data-state="error"] .row-dot {
   background: var(--fail);
 }
 
+.row-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row-code {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-4);
+}
+
+.row[data-state="error"] .row-code {
+  color: var(--fail);
+}
+
 .note {
-  padding: 18px 16px;
+  margin: 0 16px;
+  padding: 18px 0;
   font-size: 12px;
   color: var(--ink-3);
 }
@@ -264,8 +309,10 @@ body {
 .stage {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   min-height: 0;
-  background: var(--panel);
+  overflow: hidden;
+  background: var(--console);
 }
 
 .meta {
@@ -281,11 +328,13 @@ body {
   margin: 0;
   font-size: 13px;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .meta-path {
   font-size: 11px;
   color: var(--ink-4);
+  white-space: nowrap;
 }
 
 .meta-note {
@@ -304,6 +353,7 @@ body {
   text-transform: uppercase;
   color: var(--ink-3);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .stage[data-state="running"] .meta-status {
@@ -373,11 +423,16 @@ body {
   cursor: not-allowed;
 }
 
+/* One strip: the run's output first, then the script's files. It is always
+   present, so it reads as the console's own row of tabs rather than as chrome
+   that appears when a script happens to have more than one file. */
 .files {
   flex: none;
   display: flex;
-  gap: 1px;
-  padding: 8px 16px 0;
+  gap: 2px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--panel);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -389,13 +444,18 @@ body {
 .files button {
   font: inherit;
   font-size: 11px;
-  height: 24px;
-  padding: 0 9px;
+  height: 28px;
+  padding: 0 10px;
   white-space: nowrap;
   color: var(--ink-4);
   background: transparent;
   border: 0;
+  /* Reserves the selected rule's space on every tab, so selecting one does not
+     shift the row by a pixel. */
+  border-bottom: 1px solid transparent;
+  margin-bottom: -1px;
   cursor: pointer;
+  transition: color 0.12s ease;
 }
 
 .files button:hover {
@@ -404,7 +464,12 @@ body {
 
 .files button[aria-selected="true"] {
   color: var(--cyan);
-  border-bottom: 1px solid var(--cyan-dim);
+  border-bottom-color: var(--cyan);
+}
+
+.files button:focus-visible {
+  outline: 1px solid var(--cyan);
+  outline-offset: -1px;
 }
 
 .out {
@@ -417,14 +482,25 @@ body {
   margin: 0;
   padding: 16px 16px 32px;
   color: #e6edf3;
-  background: #0d1117;
   white-space: pre;
   tab-size: 4;
   font-variant-ligatures: none;
   overflow: auto;
   overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: var(--rule-strong) transparent;
+}
+
+.out::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.out::-webkit-scrollbar-thumb {
+  background: var(--rule-strong);
+  border: 3px solid transparent;
+  background-clip: content-box;
 }
 
 .out code {
@@ -447,6 +523,7 @@ body {
   display: grid;
   place-content: center;
   height: 100%;
+  margin: 0;
   color: var(--ink-4);
   font-size: 12px;
 }
@@ -548,7 +625,7 @@ body {
   white-space: pre;
   overflow: hidden;
   color: #e6edf3;
-  background: #0d1117;
+  background: var(--console);
 }
 
 @keyframes blink {
@@ -561,30 +638,35 @@ body {
   }
 }
 
-/* ── Narrow ──────────────────────────────────────────────────────────── */
+/* ── Narrow: stack the rail above the stage ──────────────────────────── */
 
-@media (max-width: 48rem) {
+@media (max-width: 60rem) {
   .deck {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
     height: auto;
     min-height: 100dvh;
     overflow: visible;
   }
 
-  .picker {
-    max-height: none;
+  .rail {
+    border-right: 0;
+    border-bottom: 1px solid var(--rule);
     overflow: visible;
   }
 
-  .picker-head {
-    flex-wrap: wrap;
+  /* One page scroll on narrow screens — a nested one here would trap the wheel. */
+  .rail-scroll {
+    overflow: visible;
+  }
+
+  .stage {
+    min-height: 60dvh;
+    overflow: visible;
   }
 
   .meta {
     flex-wrap: wrap;
-  }
-
-  .out {
-    min-height: 55dvh;
   }
 }
 

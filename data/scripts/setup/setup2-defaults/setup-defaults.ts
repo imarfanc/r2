@@ -17,11 +17,13 @@
  *
  *   bun run setup-defaults.ts --watch com.apple.universalaccess
  *
- * Two kinds of setting cannot be applied from here, and are printed for you to
- * run yourself instead:
- *   - `pmset` power settings need sudo.
- *   - `com.apple.universalaccess` (zoom) is protected by macOS privacy control,
- *     so it only accepts writes from a process holding Full Disk Access.
+ * One kind of setting cannot be applied from here and is printed for you to run
+ * yourself instead: `com.apple.universalaccess` (zoom) is protected by a macOS
+ * privacy control, so it only accepts writes from a process holding Full Disk
+ * Access.
+ *
+ * Power settings live in their own script — they need sudo rather than Full
+ * Disk Access, and `pmset` is not `defaults`.
  */
 import { heading, ok, todo, fail, info, suggest, table, type Row } from "../../_common.ts";
 
@@ -139,8 +141,10 @@ const SETTINGS: Setting[] = [
   { group: "Mission Control", domain: "com.apple.dock", key: "expose-group-apps", type: "bool", value: "true", description: "Group windows by app in Mission Control" },
 
   // ── Hot corners ─────────────────────────────────────────────────────────
-  { group: "Hot corners", domain: "com.apple.dock", key: "wvous-br-corner", type: "int", value: "14", description: "Bottom-right corner opens Quick Note" },
-  { group: "Hot corners", domain: "com.apple.dock", key: "wvous-br-modifier", type: "int", value: "0", description: "Quick Note hot corner needs no modifier key" },
+  // 0 is "no action" — the value System Settings writes for "–". (1 also reads
+  // as disabled, but it is the older spelling and not what the picker sets.)
+  { group: "Hot corners", domain: "com.apple.dock", key: "wvous-br-corner", type: "int", value: "0", description: "Bottom-right corner does nothing" },
+  { group: "Hot corners", domain: "com.apple.dock", key: "wvous-br-modifier", type: "int", value: "0", description: "Bottom-right corner has no modifier key" },
 
   // ── Dwell control (Full Disk Access required) ──────────────────────────
   //
@@ -170,19 +174,6 @@ const SETTINGS: Setting[] = [
   { group: "Zoom", domain: "com.apple.universalaccess", key: "closeViewScrollWheelToggle", type: "bool", value: "true", description: "Scroll with a modifier key to zoom" },
   { group: "Zoom", domain: "com.apple.universalaccess", key: "closeViewZoomMode", type: "int", value: "3", description: "Zoom follows the pointer in a picture-in-picture window" },
   { group: "Zoom", domain: "com.apple.universalaccess", key: "closeViewScrollWheelModifiersInt", type: "int", value: "4", description: "Control is the zoom modifier" },
-];
-
-/**
- * Power settings need sudo, so they are printed rather than run.
- *
- * `lowpowermode` takes 0 (normal) or 1 (low power) on this MacBook Air. Split
- * the commands per power source so each mode remains explicit.
- */
-const POWER_COMMANDS: [string, string][] = [
-  ["sudo pmset -b displaysleep 10", "Display sleeps after 10 min on battery"],
-  ["sudo pmset -c displaysleep 30", "Display sleeps after 30 min on power"],
-  ["sudo pmset -b lowpowermode 1", "Low power mode on battery"],
-  ["sudo pmset -c lowpowermode 1", "Low power mode on AC"],
 ];
 
 function defaultsArgs(setting: Setting, verb: "read" | "write"): string[] {
@@ -554,14 +545,6 @@ if (blockedDomains.size > 0) {
   for (const setting of SETTINGS.filter(blocked)) {
     suggest(defaultsArgs(setting, "write").join(" "));
   }
-}
-
-heading("Power settings");
-
-info("These need sudo, so run them yourself:");
-for (const [command, description] of POWER_COMMANDS) {
-  info(description);
-  suggest(command);
 }
 
 heading("Undo");

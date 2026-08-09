@@ -10,18 +10,12 @@
   </head>
   <body data-group="setup">
     <div class="deck">
-      <header class="bar">
-        <span class="prompt" aria-hidden="true">~/</span>
-        <h1 class="bar-title" id="page-title"></h1>
-        <nav class="tabs" id="groups" aria-label="Script groups"></nav>
-        <div class="bar-spacer"></div>
-        <nav class="versions" id="versions" aria-label="Frontend version"></nav>
-      </header>
-
-      <section class="picker" aria-labelledby="picker-title">
-        <div class="picker-head">
-          <h2 id="picker-title">index</h2>
-          <p class="picker-lede" id="page-lede"></p>
+      <aside class="rail">
+        <header class="rail-head">
+          <p class="eyebrow"><span class="prompt" aria-hidden="true">~/</span>script runbook</p>
+          <h1 class="rail-title" id="page-title"></h1>
+          <p class="rail-lede" id="page-lede"></p>
+          <nav class="tabs" id="groups" aria-label="Script groups"></nav>
           <input
             class="filter"
             id="filter"
@@ -29,9 +23,10 @@
             placeholder="filter…"
             aria-label="Filter scripts"
           />
-        </div>
-        <div class="chips" id="chips"></div>
-      </section>
+          <nav class="versions" id="versions" aria-label="Frontend version"></nav>
+        </header>
+        <div class="rail-scroll" id="rail-scroll"></div>
+      </aside>
 
       <main class="stage" id="console"></main>
     </div>

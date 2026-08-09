@@ -4,7 +4,7 @@ A local script runbook: a Deno server that lists the scripts under `data/scripts
 
 Run it with `deno task dev`, then open <http://localhost:8000>. Add `--open` to launch a browser once the server responds.
 
-Two pages, one per script group — **demo** for short scripts that exercise output, errors and streaming, and **setup** for one-time machine setup steps. Each page exists in two frontend versions: `v1` puts a pinned index down the left edge, `v2` stacks the group into a filterable strip above a wider console. Both talk to the same API.
+Two pages, one per script group — **demo** for short scripts that exercise output, errors and streaming, and **setup** for one-time machine setup steps. Each page exists in two frontend versions sharing a layout — a pinned index down the left edge, the console filling the rest — and differing in voice: `v1` is warm and typographic, `v2` is cool and instrumental, all mono and square-cornered, with a filter over the index. Both talk to the same API.
 
 Scripts stay in whatever language suits them. A `script.yaml` marker names the entry point, and the runner picks a launcher from its extension — `bash`/`zsh` for shell, `uv run` for Python, `bun run` for TypeScript, `osascript` for AppleScript, `swift` for Swift. Those runtimes are the reader's own; the repository itself stays Deno-only.
 

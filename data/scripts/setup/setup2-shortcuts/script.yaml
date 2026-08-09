@@ -1,0 +1,5 @@
+name: Keyboard shortcuts
+note: Clears the Show Desktop shortcuts so F11 stops sweeping your windows aside — both the key combination and the bare function key. Edits the plist with real types rather than defaults -dict-add, which silently stores the values as strings, then reads every shortcut back to prove it stuck. Pass --check to look without touching anything.
+path: shortcuts.sh
+group: setup
+section: 2-macOS

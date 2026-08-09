@@ -1,0 +1,5 @@
+name: Brew install
+note: Installs the expected Homebrew formulae and casks that are not here yet, one at a time so a single failure names itself. Never upgrades or removes anything.
+path: brew-install.sh
+group: setup
+section: 3-Packages

@@ -1,12 +1,14 @@
 import { relative } from "@std/path";
 
 import { walkFiles } from "./lib/fs.ts";
-import { REPO_ROOT } from "./lib/paths.ts";
+import { isContentPath, REPO_ROOT } from "./lib/paths.ts";
 
 const files: string[] = [];
 for await (const path of walkFiles(REPO_ROOT)) {
   if (!path.endsWith(".ts")) continue;
-  files.push(relative(REPO_ROOT, path));
+  const relativePath = relative(REPO_ROOT, path);
+  if (isContentPath(relativePath)) continue;
+  files.push(relativePath);
 }
 
 files.sort();

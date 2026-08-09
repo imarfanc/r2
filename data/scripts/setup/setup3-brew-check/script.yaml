@@ -1,0 +1,5 @@
+name: Brew inventory
+note: Checks the expected Homebrew formulae and casks against what is installed, names anything missing or extra, and exits non-zero when the machine does not match the list. Changes nothing.
+path: brew-check.sh
+group: setup
+section: 3-Packages

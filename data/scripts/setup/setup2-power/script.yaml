@@ -1,0 +1,5 @@
+name: Power settings
+note: Reads the current pmset values for display sleep and low power mode on battery and on wall power, applies whatever does not match, and reads them back. Writes need sudo — it uses an active sudo timestamp if there is one and prints the outstanding commands if not. Pass --check to look without touching anything.
+path: power.sh
+group: setup
+section: 2-macOS
