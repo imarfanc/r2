@@ -37,6 +37,8 @@
     "proseWrap": "preserve",
     "exclude": [
       "_repo/skills/**/browser-tools/**",
+      ".vscode/sessions.json",
+      "_other/git/**",
       "data/scripts/**"
     ]
   },
@@ -48,6 +50,7 @@
     },
     "exclude": [
       "_repo/skills/**/browser-tools/**",
+      ".vscode/sessions.json",
       "data/scripts/**"
     ]
   }

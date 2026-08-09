@@ -1,0 +1,5 @@
+name: Markdown preview
+note: Renders sample.md to ANSI with charmd — no glow, bat or gum needed.
+path: preview.ts
+group: demo
+section: Rendering

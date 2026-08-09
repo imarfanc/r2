@@ -59,7 +59,7 @@
     },
     "git:history": {
       "group": "repo",
-      "description": "Write commit messages to _other/git/history.md"
+      "description": "Write commit history and full messages into _other/git"
     }
   }
 }

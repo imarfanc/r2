@@ -1,6 +1,9 @@
 # macOS
 .DS_Store
 
+# Orphans left by a FUSE mount when a still-open file is deleted or replaced
+.fuse_hidden*
+
 # Environment variables
 .env
 .env.*
