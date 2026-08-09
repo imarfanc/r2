@@ -23,7 +23,8 @@
     "dev": "deno run -A _repo/tools/dev.ts",
     "dev:open": "deno run -A _repo/tools/dev.ts --open",
     "start": "deno run -A src/main.ts",
-    "rename": "deno run -A _repo/tools/rename.ts"
+    "rename": "deno run -A _repo/tools/rename.ts",
+    "git:history": "deno run -A _repo/tools/git-history.ts"
   },
   "compilerOptions": {
     "strict": true,

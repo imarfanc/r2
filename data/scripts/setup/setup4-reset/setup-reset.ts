@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env -S deno run -A
 /**
  * Reset this Mac's home folder to a known starting state.
  *
@@ -29,15 +29,18 @@
  *   --wipe        allow the clearing phase (asks for confirmation)
  *   --no-inventory  skip the inventory even if reset.yaml enables it
  */
+import { parse as parseYaml } from "jsr:@std/yaml@1";
+
 import { fail, heading, humanSize, info, ok, suggest, table, todo, type Row } from "../../_common.ts";
+import { spawn, interactive } from "../../_process.ts";
 import { Inventory, type InventoryConfig } from "./inventory.ts"; // inventory — removable
 
-const CHECK_ONLY = process.argv.includes("--check") || process.argv.includes("--dry-run");
-const ALLOW_WIPE = process.argv.includes("--wipe");
-const NO_INVENTORY = process.argv.includes("--no-inventory");
-const INTERACTIVE = Boolean(process.stdin.isTTY);
+const CHECK_ONLY = Deno.args.includes("--check") || Deno.args.includes("--dry-run");
+const ALLOW_WIPE = Deno.args.includes("--wipe");
+const NO_INVENTORY = Deno.args.includes("--no-inventory");
+const INTERACTIVE = interactive();
 
-const HOME = process.env.HOME ?? "";
+const HOME = Deno.env.get("HOME") ?? "";
 
 /* ── Config ────────────────────────────────────────────────────────────── */
 
@@ -52,7 +55,7 @@ interface Config {
 }
 
 const configPath = new URL("./reset.yaml", import.meta.url).pathname;
-const config = Bun.YAML.parse(await Bun.file(configPath).text()) as Config;
+const config = parseYaml(await Deno.readTextFile(configPath)) as Config;
 
 /** ~/foo → /Users/you/foo. Left alone if it does not start with ~. */
 function expand(path: string): string {
@@ -68,7 +71,7 @@ interface Result {
 }
 
 async function run(args: string[], timeoutMs = 120_000): Promise<Result> {
-  const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe", stdin: "ignore" });
+  const proc = spawn(args, { stdout: "pipe", stderr: "pipe", stdin: "ignore" });
   const timer = setTimeout(() => proc.kill("SIGKILL"), timeoutMs);
 
   try {
@@ -87,16 +90,7 @@ async function exists(path: string): Promise<boolean> {
 }
 
 /** Reads one line. Returns "" when nothing can type. */
-function ask(): Promise<string> {
-  if (!INTERACTIVE) return Promise.resolve("");
-  process.stdin.resume();
-  return new Promise(resolve => {
-    process.stdin.once("data", data => {
-      process.stdin.pause();
-      resolve(data.toString().trim());
-    });
-  });
-}
+const ask = readLine;
 
 const problems: string[] = [];
 
@@ -148,7 +142,7 @@ if (!config.backup.enabled) {
     }
 
     if (config.backup.savePath) {
-      await Bun.write(`${backupDirectory}/path.txt`, `${process.env.PATH ?? ""}\n`);
+      await Deno.writeTextFile(`${backupDirectory}/path.txt`, `${Deno.env.get("PATH") ?? ""}\n`);
     }
 
     ok(`Backed up ${present.length} file(s) to ${backupDirectory}`);
@@ -251,7 +245,7 @@ if (!config.trash.enabled) {
     if (CHECK_ONLY || !ALLOW_WIPE) {
       todo(`${totalItems} items (${humanSize(totalBytes)}) would go to the Trash`);
       info("Nothing has been moved. To do it:");
-      suggest("bun run setup-reset.ts --wipe");
+      suggest("deno run -A setup-reset.ts --wipe");
     } else if (!INTERACTIVE) {
       fail("--wipe needs a real terminal so it can ask you to confirm");
       info("Run it from Terminal rather than the console.");
@@ -424,4 +418,4 @@ if (config.sounds.enabled && !CHECK_ONLY) {
   await run(["afplay", sound], 10_000);
 }
 
-if (problems.length > 0) process.exit(1);
+if (problems.length > 0) Deno.exit(1);

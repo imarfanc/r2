@@ -6,7 +6,10 @@
  *
  * The colours match the console's status vocabulary: green means done, amber
  * means something is waiting on you, red means it failed.
+ *
+ * Running commands lives next door in `_process.ts`.
  */
+import { which } from "./_process.ts";
 
 const BOLD = "\x1b[1m";
 const DIM = "\x1b[2m";
@@ -41,8 +44,9 @@ export function suggest(command: string): void {
   console.log(`\n  ${BLUE}${command}${RESET}`);
 }
 
-export async function has(command: string): Promise<boolean> {
-  return (await Bun.$`command -v ${command}`.quiet().nothrow()).exitCode === 0;
+/** Kept for scripts that only want a yes or no; `which` in _process.ts gives the path. */
+export function has(command: string): boolean {
+  return which(command) !== null;
 }
 
 /** 1536 → "1.5 KB". Bytes are shown whole; everything larger gets one decimal. */

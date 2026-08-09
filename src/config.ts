@@ -11,11 +11,11 @@ export const FRONTENDS = ["v1", "v2"] as const;
 export type Frontend = (typeof FRONTENDS)[number];
 
 /** Script groups under data/scripts/. Each one is a page in every frontend. */
-export const SCRIPT_GROUPS = ["demo", "setup"] as const;
+export const SCRIPT_GROUPS = ["daily1", "setup", "demo"] as const;
 export type ScriptGroup = (typeof SCRIPT_GROUPS)[number];
 
 /** The group a frontend opens on when no page is named. */
-export const DEFAULT_GROUP: ScriptGroup = "demo";
+export const DEFAULT_GROUP: ScriptGroup = "daily1";
 
 function readFrontend(): Frontend {
   const requested = Deno.env.get("FRONTEND");

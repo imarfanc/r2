@@ -187,7 +187,7 @@ export class Inventory {
       this.config.outputDirectory,
       `${this.config.outputBasename}-${timestamp()}.txt`,
     );
-    await Bun.write(path, report);
+    await Deno.writeTextFile(path, report);
 
     return {
       path,

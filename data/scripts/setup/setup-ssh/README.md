@@ -64,9 +64,9 @@ or an internal dashboard that isn't exposed to the internet.
 ## Running the script
 
 ```sh
-bun run setup-ssh.ts --check     # look at everything, change nothing
-bun run setup-ssh.ts             # create the key, write the config, load the agent
-bun run setup-ssh.ts --no-test   # skip the live connection test to GitHub
+deno run -A setup-ssh.ts --check     # look at everything, change nothing
+deno run -A setup-ssh.ts             # create the key, write the config, load the agent
+deno run -A setup-ssh.ts --no-test   # skip the live connection test to GitHub
 ```
 
 **Create the key from a real Terminal, not the web console.** `ssh-keygen` has

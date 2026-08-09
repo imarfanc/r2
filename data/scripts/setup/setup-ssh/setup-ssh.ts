@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env -S deno run -A
 /**
  * SSH key, agent and config. See README.md in this folder for what SSH is and
  * why any of this matters — this file is only the mechanics.
@@ -16,14 +16,15 @@
  *   --no-test   skip the live connection test to github.com
  */
 import { fail, heading, info, ok, suggest, table, todo, type Row } from "../../_common.ts";
+import { exists, spawn, interactive } from "../../_process.ts";
 
-const CHECK_ONLY = process.argv.includes("--check") || process.argv.includes("--dry-run");
-const NO_TEST = process.argv.includes("--no-test");
+const CHECK_ONLY = Deno.args.includes("--check") || Deno.args.includes("--dry-run");
+const NO_TEST = Deno.args.includes("--no-test");
 
 /** Can anything answer a prompt? The web console streams output only. */
-const INTERACTIVE = Boolean(process.stdin.isTTY);
+const INTERACTIVE = interactive();
 
-const HOME = process.env.HOME ?? "";
+const HOME = Deno.env.get("HOME") ?? "";
 const SSH_DIR = `${HOME}/.ssh`;
 const KEY = `${SSH_DIR}/id_ed25519`;
 const PUB = `${KEY}.pub`;
@@ -56,7 +57,7 @@ interface Result {
 }
 
 async function run(args: string[], timeoutMs = 30_000): Promise<Result> {
-  const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe", stdin: "ignore" });
+  const proc = spawn(args, { stdout: "pipe", stderr: "pipe", stdin: "ignore" });
   const timer = setTimeout(() => proc.kill("SIGKILL"), timeoutMs);
 
   try {
@@ -72,13 +73,11 @@ async function run(args: string[], timeoutMs = 30_000): Promise<Result> {
 
 /** Hands the terminal over — for commands that need to ask a question. */
 async function runInteractive(args: string[]): Promise<number> {
-  const proc = Bun.spawn(args, { stdin: "inherit", stdout: "inherit", stderr: "inherit" });
+  const proc = spawn(args, { stdin: "inherit", stdout: "inherit", stderr: "inherit" });
   return proc.exited;
 }
 
-async function exists(path: string): Promise<boolean> {
-  return Bun.file(path).exists();
-}
+
 
 /** Octal permissions, e.g. "700". SSH refuses to use keys others can read. */
 async function mode(path: string): Promise<string | null> {
@@ -206,8 +205,8 @@ if (CHECK_ONLY) {
   if (!startingState.key) todo("No key yet — run without --check to create one.");
   else ok("A key exists.");
   info("README.md in this folder explains what each of these does.");
-  suggest("bun run setup-ssh.ts   # to apply");
-  process.exit(0);
+  suggest("deno run -A setup-ssh.ts   # to apply");
+  Deno.exit(0);
 }
 
 /* ── Key ───────────────────────────────────────────────────────────────── */
@@ -224,10 +223,10 @@ if (startingState.key) {
 } else if (!INTERACTIVE) {
   todo("No key, and no way to ask you for a passphrase from here.");
   info("Run this in Terminal instead — it will ask you to pick a passphrase:");
-  suggest(`ssh-keygen -t ed25519 -C "${process.env.USER ?? "me"}@$(scutil --get ComputerName)"`);
+  suggest(`ssh-keygen -t ed25519 -C "${Deno.env.get("USER") ?? "me"}@$(scutil --get ComputerName)"`);
   info("Then run this script again to finish the setup.");
 } else {
-  const label = `${process.env.USER ?? "me"}@${(await run(["scutil", "--get", "ComputerName"])).out || "mac"}`;
+  const label = `${Deno.env.get("USER") ?? "me"}@${(await run(["scutil", "--get", "ComputerName"])).out || "mac"}`;
 
   info("Creating a new ed25519 key.");
   info("You will be asked for a passphrase — pick one and let the Keychain");
@@ -253,7 +252,7 @@ if (await exists(KEY)) {
 
 heading("Config");
 
-const existingConfig = (await exists(CONFIG)) ? await Bun.file(CONFIG).text() : "";
+const existingConfig = exists(CONFIG) ? await Deno.readTextFile(CONFIG) : "";
 const hasBlock = existingConfig.includes(BEGIN);
 
 let nextConfig: string;
@@ -276,11 +275,11 @@ if (nextConfig === existingConfig) {
 } else {
   if (existingConfig) {
     const backup = `${CONFIG}.backup-${new Date().toISOString().replace(/[:.]/g, "-")}`;
-    await Bun.write(backup, existingConfig);
+    await Deno.writeTextFile(backup, existingConfig);
     info(`Backed up your old config to ${backup}`);
   }
 
-  await Bun.write(CONFIG, nextConfig);
+  await Deno.writeTextFile(CONFIG, nextConfig);
   await run(["chmod", "600", CONFIG]);
   ok(hasBlock ? "Updated the managed block" : "Added the managed block");
 }
@@ -307,8 +306,8 @@ if (!print) {
 /* ── Clipboard ─────────────────────────────────────────────────────────── */
 
 if (await exists(PUB)) {
-  const pub = await Bun.file(PUB).text();
-  const proc = Bun.spawn(["pbcopy"], { stdin: "pipe" });
+  const pub = await Deno.readTextFile(PUB);
+  const proc = spawn(["pbcopy"], { stdin: "pipe" });
   proc.stdin.write(pub);
   await proc.stdin.end();
 
@@ -380,7 +379,7 @@ suggest(`ssh-add -d ${KEY}`);
 
 if (failedChecks > 0) {
   todo(`${failedChecks} check(s) did not pass — see the table above`);
-  process.exit(1);
+  Deno.exit(1);
 }
 
-if (!githubOk) process.exit(1);
+if (!githubOk) Deno.exit(1);

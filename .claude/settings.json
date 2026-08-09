@@ -1,0 +1,7 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "deno run -q --allow-read --allow-run=git \"$CLAUDE_PROJECT_DIR/_other/scripts/statusline.ts\"",
+    "padding": 0
+  }
+}

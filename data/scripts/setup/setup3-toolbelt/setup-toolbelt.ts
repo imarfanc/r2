@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env -S deno run -A
 /**
  * Which of the usual command line tools this Mac has, which version, and where
  * each one came from. Edit TOOLS to match your own toolbelt.
@@ -15,6 +15,7 @@
  *   --check   same as the default; this script never changes anything
  */
 import { heading, info, ok, suggest, table, todo, type Row } from "../../_common.ts";
+import { exists, spawn, which } from "../../_process.ts";
 
 interface Tool {
   /** What you type. */
@@ -49,7 +50,7 @@ interface Result {
 }
 
 async function run(args: string[], timeoutMs = 15_000): Promise<Result> {
-  const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe", stdin: "ignore" });
+  const proc = spawn(args, { stdout: "pipe", stderr: "pipe", stdin: "ignore" });
   const timer = setTimeout(() => proc.kill("SIGKILL"), timeoutMs);
 
   try {
@@ -63,10 +64,7 @@ async function run(args: string[], timeoutMs = 15_000): Promise<Result> {
   }
 }
 
-async function which(command: string): Promise<string | null> {
-  const { code, out } = await run(["command", "-v", command]);
-  return code === 0 && out ? (out.split("\n")[0] ?? null) : null;
-}
+
 
 /**
  * A dotted number, optionally with a suffix like -beta.1 or +build. Anchored on
@@ -94,14 +92,13 @@ async function version(tool: Tool): Promise<string> {
 /** Homebrew's prefix, for telling a brewed tool from a system one. */
 async function brewPrefix(): Promise<string | null> {
   for (const path of ["/opt/homebrew/bin/brew", "/usr/local/bin/brew"]) {
-    if (await Bun.file(path).exists()) {
+    if (exists(path)) {
       const { code, out } = await run([path, "--prefix"]);
       if (code === 0 && out) return out;
     }
   }
 
-  const onPath = await run(["command", "-v", "brew"]);
-  if (onPath.code !== 0) return null;
+  if (!which("brew")) return null;
 
   const { code, out } = await run(["brew", "--prefix"]);
   return code === 0 && out ? out : null;
@@ -127,7 +124,7 @@ const prefix = await brewPrefix();
 // All of them at once — fourteen sequential subprocesses is a slow script.
 const found = await Promise.all(
   TOOLS.map(async tool => {
-    const path = await which(tool.command);
+    const path = which(tool.command);
     return {
       tool,
       path,
@@ -183,4 +180,4 @@ if (system.length > 0) {
   suggest(`echo 'eval "$(${prefix ?? "/opt/homebrew"}/bin/brew shellenv)"' >> ~/.zprofile`);
 }
 
-if (missing.length > 0) process.exit(1);
+if (missing.length > 0) Deno.exit(1);

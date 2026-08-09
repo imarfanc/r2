@@ -56,6 +56,10 @@
     "rename": {
       "group": "repo",
       "description": "Rename the project across state, headings, and source"
+    },
+    "git:history": {
+      "group": "repo",
+      "description": "Write commit messages to _other/git/history.md"
     }
   }
 }

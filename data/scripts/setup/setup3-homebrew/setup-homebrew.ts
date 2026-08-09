@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env -S deno run -A
 /**
  * Homebrew status, and what is out of date by how much.
  *
@@ -14,6 +14,7 @@
  *   --check   same as the default; this script never changes anything
  */
 import { fail, heading, info, ok, suggest, table, todo, type Row } from "../../_common.ts";
+import { exists, spawn, which } from "../../_process.ts";
 
 /** Where Homebrew lives on Apple silicon and on Intel, in that order. */
 const KNOWN_PREFIXES = ["/opt/homebrew/bin/brew", "/usr/local/bin/brew"];
@@ -25,7 +26,7 @@ interface Result {
 }
 
 async function run(args: string[], timeoutMs = 60_000): Promise<Result> {
-  const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe", stdin: "ignore" });
+  const proc = spawn(args, { stdout: "pipe", stderr: "pipe", stdin: "ignore" });
   const timer = setTimeout(() => proc.kill("SIGKILL"), timeoutMs);
 
   try {
@@ -45,11 +46,11 @@ async function run(args: string[], timeoutMs = 60_000): Promise<Result> {
  * is sitting right there.
  */
 async function findBrew(): Promise<string | null> {
-  const onPath = await run(["command", "-v", "brew"]);
-  if (onPath.code === 0 && onPath.out) return onPath.out.split("\n")[0]!;
+  const onPath = which("brew");
+  if (onPath) return onPath;
 
   for (const path of KNOWN_PREFIXES) {
-    if (await Bun.file(path).exists()) return path;
+    if (exists(path)) return path;
   }
 
   return null;
@@ -120,7 +121,7 @@ if (!brew) {
     suggest(`echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile`);
   }
 
-  process.exit(1);
+  Deno.exit(1);
 }
 
 const versionOut = (await run([brew, "--version"])).out.split("\n");
@@ -204,4 +205,4 @@ if (doctor.code === 0) {
   suggest("brew doctor");
 }
 
-if (stale && stale.length > 0) process.exit(1);
+if (stale && stale.length > 0) Deno.exit(1);

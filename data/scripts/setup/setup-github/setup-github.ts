@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env -S deno run -A
 /**
  * GitHub CLI: signed in, as whom, with which permissions, over which protocol.
  *
@@ -15,12 +15,13 @@
  *   --no-login never run gh auth login, only report
  */
 import { fail, heading, info, ok, suggest, table, todo, type Row } from "../../_common.ts";
+import { exists, interactive, spawn, which } from "../../_process.ts";
 
-const CHECK_ONLY = process.argv.includes("--check") || process.argv.includes("--dry-run");
-const NO_LOGIN = process.argv.includes("--no-login");
-const INTERACTIVE = Boolean(process.stdin.isTTY);
+const CHECK_ONLY = Deno.args.includes("--check") || Deno.args.includes("--dry-run");
+const NO_LOGIN = Deno.args.includes("--no-login");
+const INTERACTIVE = interactive();
 
-const HOME = process.env.HOME ?? "";
+const HOME = Deno.env.get("HOME") ?? "";
 const PUB = `${HOME}/.ssh/id_ed25519.pub`;
 
 /* ── Shell ─────────────────────────────────────────────────────────────── */
@@ -32,7 +33,7 @@ interface Result {
 }
 
 async function run(args: string[], timeoutMs = 30_000): Promise<Result> {
-  const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe", stdin: "ignore" });
+  const proc = spawn(args, { stdout: "pipe", stderr: "pipe", stdin: "ignore" });
   const timer = setTimeout(() => proc.kill("SIGKILL"), timeoutMs);
 
   try {
@@ -47,12 +48,14 @@ async function run(args: string[], timeoutMs = 30_000): Promise<Result> {
 }
 
 async function runInteractive(args: string[]): Promise<number> {
-  const proc = Bun.spawn(args, { stdin: "inherit", stdout: "inherit", stderr: "inherit" });
+  const proc = spawn(args, { stdin: "inherit", stdout: "inherit", stderr: "inherit" });
   return proc.exited;
 }
 
-async function has(command: string): Promise<boolean> {
-  return (await run(["command", "-v", command])).code === 0;
+// `command -v` is a shell builtin rather than a program, so this is a PATH
+// walk rather than a process — see `_process.ts`.
+function has(command: string): boolean {
+  return which(command) !== null;
 }
 
 /* ── Facts ─────────────────────────────────────────────────────────────── */
@@ -95,7 +98,7 @@ async function gitConfig(key: string): Promise<string | null> {
 
 /** SHA256 fingerprint of the local public key, or null if there isn't one. */
 async function localKeyFingerprint(): Promise<string | null> {
-  if (!(await Bun.file(PUB).exists())) return null;
+  if (!(exists(PUB))) return null;
   const { code, out } = await run(["ssh-keygen", "-lf", PUB]);
   return code === 0 ? (out.split(/\s+/)[1] ?? null) : null;
 }
@@ -113,7 +116,7 @@ async function remoteKeyFingerprints(): Promise<string[] | null> {
 
   for (const key of out.split("\n").filter(Boolean)) {
     const tmp = `/tmp/setup-github-key-${crypto.randomUUID()}.pub`;
-    await Bun.write(tmp, `${key}\n`);
+    await Deno.writeTextFile(tmp, `${key}\n`);
     const { code: fpCode, out: fpOut } = await run(["ssh-keygen", "-lf", tmp]);
     await run(["rm", "-f", tmp]);
     if (fpCode === 0) {
@@ -135,7 +138,7 @@ if (!version) {
   fail("gh is not installed");
   info("The Toolbelt script installs it, or:");
   suggest("brew install gh");
-  process.exit(1);
+  Deno.exit(1);
 }
 
 let authed = await signedIn();
@@ -253,5 +256,5 @@ if (problems.length === 0) {
   }
 }
 
-if (CHECK_ONLY) process.exit(0);
-if (problems.length > 0) process.exit(1);
+if (CHECK_ONLY) Deno.exit(0);
+if (problems.length > 0) Deno.exit(1);

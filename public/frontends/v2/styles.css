@@ -22,6 +22,14 @@
   --ok: #7fd48a;
   --fail: #ef7d7d;
 
+  /* The output pane is a terminal wherever it appears, so it keeps its own
+     dark palette — these tokens do not flip with the system appearance. */
+  --terminal: #0d1117;
+  --terminal-ink: #e6edf3;
+  --terminal-ink-2: #a8b0be;
+  --terminal-ink-3: #6c7585;
+  --terminal-rule: #2b313d;
+
   --mono: "JetBrains Mono", ui-monospace, monospace;
   --rail-w: 20rem;
 
@@ -481,7 +489,8 @@ body {
   min-height: 0;
   margin: 0;
   padding: 16px 16px 32px;
-  color: #e6edf3;
+  color: var(--terminal-ink);
+  background: var(--terminal);
   white-space: pre;
   tab-size: 4;
   font-variant-ligatures: none;
@@ -489,7 +498,7 @@ body {
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
-  scrollbar-color: var(--rule-strong) transparent;
+  scrollbar-color: var(--terminal-rule) transparent;
 }
 
 .out::-webkit-scrollbar {
@@ -498,14 +507,14 @@ body {
 }
 
 .out::-webkit-scrollbar-thumb {
-  background: var(--rule-strong);
+  background: var(--terminal-rule);
   border: 3px solid transparent;
   background-clip: content-box;
 }
 
 .out code {
   font: inherit;
-  color: var(--ink-2);
+  color: var(--terminal-ink-2);
 }
 
 .out.is-running::after {
@@ -516,7 +525,7 @@ body {
 
 .hint {
   font-size: 12px;
-  color: var(--ink-4);
+  color: var(--terminal-ink-3);
 }
 
 .stage-empty {
@@ -624,8 +633,8 @@ body {
   line-height: 1;
   white-space: pre;
   overflow: hidden;
-  color: #e6edf3;
-  background: var(--console);
+  color: var(--terminal-ink);
+  background: var(--terminal);
 }
 
 @keyframes blink {
@@ -676,5 +685,47 @@ body {
   *::after {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* ── Light appearance ────────────────────────────────────────────────────
+   The same instrument on paper: panels go white, rules go graphite, and the
+   cyan darkens enough to hold its contrast. The output pane is deliberately
+   left dark — a terminal reads as a terminal, and the ANSI palette scripts
+   emit is written for a dark ground.                                     */
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --paper: #f4f5f7;
+    --panel: #ffffff;
+    --panel-raised: #ffffff;
+    --console: #ffffff;
+
+    --rule: #e2e5ea;
+    --rule-strong: #c8cdd6;
+
+    --ink: #14171c;
+    --ink-2: #434a55;
+    --ink-3: #6b7280;
+    --ink-4: #98a0ac;
+
+    --cyan: #17796c;
+    --cyan-dim: #9ed3c9;
+
+    --ok: #1f7a35;
+    --fail: #c0392f;
+
+    color-scheme: light;
+    -webkit-font-smoothing: auto;
+  }
+
+  /* Cyan dark enough to read on white needs light text on top. */
+  .go,
+  .type-size:has(input:checked) {
+    color: #ffffff;
+  }
+
+  .go:hover:not(:disabled) {
+    background: #0f5b51;
   }
 }

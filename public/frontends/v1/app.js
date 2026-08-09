@@ -138,6 +138,9 @@ function renderConsole(state) {
     notice = null;
     parts = buildConsole(script);
     consoleRoot.replaceChildren(...parts.nodes);
+    // The tab strip names the script's files, so it cannot wait for someone to
+    // ask for the source view — there is no longer a button that asks.
+    loadSource(script);
   }
 
   updateConsole(state, script);
@@ -169,25 +172,6 @@ function buildConsole(script) {
   const actions = document.createElement("div");
   actions.className = "console-actions";
 
-  const toggle = document.createElement("div");
-  toggle.className = "view-toggle";
-  toggle.role = "tablist";
-  toggle.setAttribute("aria-label", "Console view");
-  const viewButtons = ["output", "source"].map((name) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.role = "tab";
-    button.textContent = name;
-    button.addEventListener("click", () => {
-      if (view === name) return;
-      view = name;
-      if (name === "source") loadSource(script);
-      render(catalog.state);
-    });
-    toggle.append(button);
-    return [name, button];
-  });
-
   const status = document.createElement("div");
   status.className = "console-status";
   status.setAttribute("aria-live", "polite");
@@ -218,25 +202,26 @@ function buildConsole(script) {
   run.textContent = "Run";
   run.addEventListener("click", () => catalog.run());
 
-  actions.append(toggle, status, copy, open, settings.root, run);
+  actions.append(status, copy, open, settings.root, run);
   head.append(identity, actions);
 
   const noticeLine = document.createElement("p");
   noticeLine.className = "console-notice";
   noticeLine.hidden = true;
 
+  // One strip for everything the console can show: the run's output first, then
+  // the script's own files. A separate output/source toggle beside it was two
+  // controls for one question — "which of these am I looking at".
   const tabs = document.createElement("div");
   tabs.className = "file-tabs";
   tabs.role = "tablist";
-  tabs.setAttribute("aria-label", "Script files");
-  tabs.hidden = true;
+  tabs.setAttribute("aria-label", "Output and script files");
 
   const output = document.createElement("pre");
   output.className = "console-out";
 
   return {
     nodes: [head, noticeLine, tabs, output],
-    viewButtons: new Map(viewButtons),
     status,
     copy,
     run,
@@ -262,10 +247,6 @@ function updateConsole(state, script) {
   const run = catalog.runOf(script.id);
   consoleRoot.dataset.state = run.state;
 
-  for (const [name, button] of parts.viewButtons) {
-    button.setAttribute("aria-selected", String(name === view));
-  }
-
   parts.status.replaceChildren();
   if (run.state === "running") {
     parts.status.append(span("running", "status-running"));
@@ -289,12 +270,41 @@ function updateConsole(state, script) {
   renderBody(run);
 }
 
+/** `Output`, then one tab per file. The first tab is the run, not a file. */
+function renderTabs() {
+  const { tabs } = parts;
+  tabs.replaceChildren();
+  tabs.append(fileTab("Output", view === "output", () => {
+    view = "output";
+    render(catalog.state);
+  }));
+
+  for (const [index, file] of (source?.files ?? []).entries()) {
+    tabs.append(fileTab(file.name, view === "source" && index === activeFile, () => {
+      view = "source";
+      activeFile = index;
+      render(catalog.state);
+    }));
+  }
+}
+
+function fileTab(label, selected, onClick) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.role = "tab";
+  button.textContent = label;
+  button.setAttribute("aria-selected", String(selected));
+  button.addEventListener("click", onClick);
+  return button;
+}
+
 function renderBody(run) {
-  const { output, tabs } = parts;
+  const { output } = parts;
   const pinned = output.scrollHeight - output.scrollTop - output.clientHeight < 40;
 
+  renderTabs();
+
   if (view === "output") {
-    tabs.hidden = true;
     output.classList.toggle("is-running", run.state === "running");
     output.classList.remove("console-source");
     if (run.output) output.replaceChildren(renderOutput(run.output));
@@ -306,24 +316,9 @@ function renderBody(run) {
 
   output.classList.remove("is-running");
   output.classList.add("console-source");
-  tabs.hidden = !(source?.files?.length > 1);
 
   if (!source) return output.replaceChildren(hint("Reading…"));
   if (source.error) return output.replaceChildren(hint(source.error));
-
-  tabs.replaceChildren();
-  source.files.forEach((file, index) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.role = "tab";
-    button.textContent = file.name;
-    button.setAttribute("aria-selected", String(index === activeFile));
-    button.addEventListener("click", () => {
-      activeFile = index;
-      render(catalog.state);
-    });
-    tabs.append(button);
-  });
 
   const file = source.files[activeFile];
   const code = document.createElement("code");

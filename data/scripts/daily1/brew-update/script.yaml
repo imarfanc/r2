@@ -1,0 +1,5 @@
+name: Update Homebrew
+note: Runs brew update, outdated, upgrade, cleanup, cleanup --prune=all, --version and doctor in sequence, each with its own heading and a rule carrying its exit code.
+path: brew-update.ts
+group: daily1
+section: Homebrew

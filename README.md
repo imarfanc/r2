@@ -6,7 +6,7 @@ Run it with `deno task dev`, then open <http://localhost:8000>. Add `--open` to 
 
 Two pages, one per script group — **demo** for short scripts that exercise output, errors and streaming, and **setup** for one-time machine setup steps. Each page exists in two frontend versions sharing a layout — a pinned index down the left edge, the console filling the rest — and differing in voice: `v1` is warm and typographic, `v2` is cool and instrumental, all mono and square-cornered, with a filter over the index. Both talk to the same API.
 
-Scripts stay in whatever language suits them. A `script.yaml` marker names the entry point, and the runner picks a launcher from its extension — `bash`/`zsh` for shell, `uv run` for Python, `bun run` for TypeScript, `osascript` for AppleScript, `swift` for Swift. Those runtimes are the reader's own; the repository itself stays Deno-only.
+Scripts stay in whatever language suits them. A `script.yaml` marker names the entry point, and the runner picks a launcher from its extension — `bash`/`zsh` for shell, `uv run` for Python, `deno run` or `bun run` for TypeScript depending on the shebang, `osascript` for AppleScript, `swift` for Swift. Those runtimes are the reader's own; the repository itself stays Deno-only.
 
 ## Layout
 

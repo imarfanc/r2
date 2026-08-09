@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily scripts · Runbook</title>
+    <link rel="icon" href="/shared/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/shared/fonts.css" />
+    <link rel="stylesheet" href="/v2/styles.css" />
+  </head>
+  <body data-group="daily1">
+    <div class="deck">
+      <aside class="rail">
+        <header class="rail-head">
+          <p class="eyebrow"><span class="prompt" aria-hidden="true">~/</span>script runbook</p>
+          <h1 class="rail-title" id="page-title"></h1>
+          <p class="rail-lede" id="page-lede"></p>
+          <nav class="tabs" id="groups" aria-label="Script groups"></nav>
+          <input
+            class="filter"
+            id="filter"
+            type="search"
+            placeholder="filter…"
+            aria-label="Filter scripts"
+          />
+          <nav class="versions" id="versions" aria-label="Frontend version"></nav>
+        </header>
+        <div class="rail-scroll" id="rail-scroll"></div>
+      </aside>
+
+      <main class="stage" id="console"></main>
+    </div>
+
+    <script type="module" src="/v2/app.js"></script>
+  </body>
+</html>

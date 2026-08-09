@@ -12,13 +12,16 @@
 # To add a package, put it in the right array. Order is display order.
 
 FORMULAE=(
+	bat
 	fzf
+	glow
+	gum
 	herdr
 	just
+	lsd
 )
 
 CASKS=(
-	atuin-desktop
 	chatgpt
 	claude
 	cursor

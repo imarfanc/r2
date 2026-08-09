@@ -1,0 +1,5 @@
+name: Installed inventory
+note: Four tables — Homebrew formulae with the command each one puts on PATH, Homebrew casks, and the contents of /Applications split into the apps a cask manages and the ones nothing will ever update but you.
+path: inventory.ts
+group: daily1
+section: Homebrew

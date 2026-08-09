@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env -S deno run -A
 /**
  * Tools that install themselves from a URL rather than from Homebrew.
  *
@@ -23,10 +23,11 @@
  *               real terminal, and asks before each one)
  */
 import { fail, heading, info, ok, suggest, table, todo, type Row } from "../../_common.ts";
+import { exists, interactive, spawn, waitForEnter, which } from "../../_process.ts";
 
-const INSTALL = process.argv.includes("--install");
-const INTERACTIVE = Boolean(process.stdin.isTTY);
-const HOME = process.env.HOME ?? "";
+const INSTALL = Deno.args.includes("--install");
+const INTERACTIVE = interactive();
+const HOME = Deno.env.get("HOME") ?? "";
 
 interface Tool {
   /** What you type. */
@@ -118,7 +119,7 @@ interface Result {
 }
 
 async function run(args: string[], timeoutMs = 15_000): Promise<Result> {
-  const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe", stdin: "ignore" });
+  const proc = spawn(args, { stdout: "pipe", stderr: "pipe", stdin: "ignore" });
   const timer = setTimeout(() => proc.kill("SIGKILL"), timeoutMs);
 
   try {
@@ -133,17 +134,17 @@ async function run(args: string[], timeoutMs = 15_000): Promise<Result> {
 }
 
 async function runInteractive(args: string[]): Promise<number> {
-  const proc = Bun.spawn(args, { stdin: "inherit", stdout: "inherit", stderr: "inherit" });
+  const proc = spawn(args, { stdin: "inherit", stdout: "inherit", stderr: "inherit" });
   return proc.exited;
 }
 
 /** PATH first, then the installer's own directory. */
 async function locate(tool: Tool): Promise<string | null> {
-  const onPath = await run(["command", "-v", tool.command]);
-  if (onPath.code === 0 && onPath.out) return onPath.out.split("\n")[0]!;
+  const onPath = which(tool.command);
+  if (onPath) return onPath;
 
   for (const path of tool.paths) {
-    if (await Bun.file(path).exists()) return path;
+    if (exists(path)) return path;
   }
 
   return null;
@@ -186,20 +187,10 @@ function sourceOf(path: string): Row[number] {
 }
 
 /** Is it findable in a fresh shell, or only because we knew where to look? */
-async function onPath(command: string): Promise<boolean> {
-  return (await run(["command", "-v", command])).code === 0;
+function onPath(command: string): boolean {
+  return which(command) !== null;
 }
 
-function waitForEnter(): Promise<void> {
-  if (!INTERACTIVE) return Promise.resolve();
-  process.stdin.resume();
-  return new Promise<void>(resolve => {
-    process.stdin.once("data", () => {
-      process.stdin.pause();
-      resolve();
-    });
-  });
-}
 
 /* ── Report ────────────────────────────────────────────────────────────── */
 
@@ -313,4 +304,4 @@ if (installed.length === 0) {
   for (const { tool } of installed) suggest(tool.update);
 }
 
-if (missing.length > 0) process.exit(1);
+if (missing.length > 0) Deno.exit(1);

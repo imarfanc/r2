@@ -10,6 +10,11 @@ import { loadPrefs, savePrefs } from "./prefs.js";
  */
 
 export const PAGES = {
+  daily1: {
+    title: "Every",
+    emphasis: "day",
+    lede: "Routine maintenance you run on a schedule — keep the machine current.",
+  },
   demo: {
     title: "Try",
     emphasis: "demos",
@@ -24,7 +29,7 @@ export const PAGES = {
 
 /** The group this page shows, from `<body data-group>`. */
 export function pageGroup() {
-  return document.body.dataset.group ?? "demo";
+  return document.body.dataset.group ?? "daily1";
 }
 
 /** The frontend version this page belongs to, from its own URL. */

@@ -107,7 +107,11 @@ export async function listScripts(group: string): Promise<ScriptMeta[]> {
 export function spawnCommand(fileName: string, firstLine: string): string[] {
   const extension = fileName.slice(fileName.lastIndexOf(".")).toLowerCase();
   if (extension === ".py") return ["uv", "run", fileName];
-  if (extension === ".ts" || extension === ".tsx") return ["bun", "run", fileName];
+  // TypeScript is the one extension two runtimes both claim, so its shebang
+  // decides: `#!/usr/bin/env -S deno run …` picks Deno, anything else Bun.
+  if (extension === ".ts" || extension === ".tsx") {
+    return firstLine.includes("deno") ? ["deno", "run", "-A", fileName] : ["bun", "run", fileName];
+  }
   if (extension === ".applescript" || extension === ".scpt") return ["osascript", fileName];
   if (extension === ".swift") return ["swift", fileName];
   return firstLine.includes("zsh") ? ["zsh", fileName] : ["bash", fileName];

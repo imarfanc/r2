@@ -61,7 +61,10 @@ install_kind() {
 	[[ "$label" == Casks ]] && args+=(--cask)
 
 	for name in "${pending[@]}"; do
-		todo "installing $name…"
+		# Braced because the ellipsis follows immediately: bash 3.2, which is what
+		# /bin/bash still is on macOS, reads the first byte of a multibyte
+		# character as part of the variable name and then reports it unbound.
+		todo "installing ${name}…"
 		if "$brew" "${args[@]}" "$name"; then
 			ok "$name"
 			installed+=("$name")

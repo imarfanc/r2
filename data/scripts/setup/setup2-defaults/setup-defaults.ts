@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env -S deno run -A
 /**
  * Finder, keyboard, Dock, screenshot and zoom defaults worth setting on a fresh Mac.
  *
@@ -9,13 +9,13 @@
  *
  * Run it read-only to just look at the machine, changing nothing:
  *
- *   bun run setup-defaults.ts --check
+ *   deno run -A setup-defaults.ts --check
  *
  * Or watch a domain to discover which key a System Settings toggle actually
  * writes — the reliable way to find a key name on a macOS version you do not
  * already know by heart:
  *
- *   bun run setup-defaults.ts --watch com.apple.universalaccess
+ *   deno run -A setup-defaults.ts --watch com.apple.universalaccess
  *
  * One kind of setting cannot be applied from here and is printed for you to run
  * yourself instead: `com.apple.universalaccess` (zoom) is protected by a macOS
@@ -26,8 +26,9 @@
  * Disk Access, and `pmset` is not `defaults`.
  */
 import { heading, ok, todo, fail, info, suggest, table, type Row } from "../../_common.ts";
+import { spawn, waitForEnter } from "../../_process.ts";
 
-const CHECK_ONLY = process.argv.includes("--check") || process.argv.includes("--dry-run");
+const CHECK_ONLY = Deno.args.includes("--check") || Deno.args.includes("--dry-run");
 
 type SettingType = "bool" | "int" | "float" | "string" | "intDict";
 
@@ -49,7 +50,7 @@ interface Setting {
  */
 const PROTECTED_DOMAINS = ["com.apple.universalaccess"];
 
-const SCREENSHOT_DIR = `${process.env.HOME}/Desktop/screenshots`;
+const SCREENSHOT_DIR = `${Deno.env.get("HOME")}/Desktop/screenshots`;
 
 const SETTINGS: Setting[] = [
   // ── Save dialogs ────────────────────────────────────────────────────────
@@ -155,7 +156,7 @@ const SETTINGS: Setting[] = [
   // Methods, and it does nothing until a head or eye tracking source is active.
   //
   // If you want the master switch in here too, find its key rather than guess:
-  //   bun run setup-defaults.ts --watch com.apple.universalaccess
+  //   deno run -A setup-defaults.ts --watch com.apple.universalaccess
   { group: "Dwell", domain: "com.apple.universalaccess", key: "dwellTimeDefaultAction", type: "float", value: "0.25", description: "Perform the default dwell action after 0.25 seconds" },
   { group: "Dwell", domain: "com.apple.universalaccess", key: "virtualKeyboardCornerActionType", type: "intDict", value: "{\"0\":0,\"1\":1,\"2\":0,\"3\":0}", description: "Only the bottom-right dwell corner hides or shows the Home Panel" },
 
@@ -191,7 +192,7 @@ function defaultsArgs(setting: Setting, verb: "read" | "write"): string[] {
 }
 
 async function run(args: string[]): Promise<{ code: number; out: string }> {
-  const proc = Bun.spawn(args, { stdout: "pipe", stderr: "ignore" });
+  const proc = spawn(args, { stdout: "pipe", stderr: "ignore" });
   const out = await new Response(proc.stdout).text();
   return { code: await proc.exited, out: out.trim() };
 }
@@ -307,25 +308,15 @@ async function snapshot(domain: string): Promise<Map<string, string>> {
   }
 }
 
-function waitForEnter(): Promise<void> {
-  if (!process.stdin.isTTY) return Promise.resolve();
-  process.stdin.resume();
-  return new Promise<void>(resolve => {
-    process.stdin.once("data", () => {
-      process.stdin.pause();
-      resolve();
-    });
-  });
-}
 
-const watchIndex = process.argv.indexOf("--watch");
+const watchIndex = Deno.args.indexOf("--watch");
 
 if (watchIndex !== -1) {
-  const domain = process.argv[watchIndex + 1];
+  const domain = Deno.args[watchIndex + 1];
 
   if (!domain) {
     fail("--watch needs a domain, e.g. --watch com.apple.universalaccess");
-    process.exit(1);
+    Deno.exit(1);
   }
 
   heading(`Watching ${domain}`);
@@ -368,7 +359,7 @@ if (watchIndex !== -1) {
     info("Add the interesting one to SETTINGS above.");
   }
 
-  process.exit(0);
+  Deno.exit(0);
 }
 
 /* ── System ────────────────────────────────────────────────────────────── */
@@ -442,8 +433,8 @@ if (CHECK_ONLY) {
   heading("Summary");
   info(`${pending.length} of ${SETTINGS.length} settings differ from what this script would apply.`);
   info("Protected-domain write permission will be checked only in apply mode.");
-  suggest("bun run setup-defaults.ts   # to apply");
-  process.exit(0);
+  suggest("deno run -A setup-defaults.ts   # to apply");
+  Deno.exit(0);
 }
 
 /* ── Apply ─────────────────────────────────────────────────────────────── */
@@ -555,5 +546,5 @@ info("For example: defaults delete com.apple.finder ShowStatusBar");
 
 if (wrong.length > 0) {
   todo(`${wrong.length} setting(s) did not stick — see above`);
-  process.exit(1);
+  Deno.exit(1);
 }

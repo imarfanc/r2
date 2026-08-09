@@ -18,13 +18,20 @@ Deno.test("a marker without a path is not a script", () => {
 Deno.test("the launcher is chosen by extension, then by shebang", () => {
   assertEquals(spawnCommand("table.py", ""), ["uv", "run", "table.py"]);
   assertEquals(spawnCommand("setup.ts", ""), ["bun", "run", "setup.ts"]);
+  assertEquals(spawnCommand("setup.ts", "#!/usr/bin/env bun"), ["bun", "run", "setup.ts"]);
+  assertEquals(spawnCommand("task.ts", "#!/usr/bin/env -S deno run -A"), [
+    "deno",
+    "run",
+    "-A",
+    "task.ts",
+  ]);
   assertEquals(spawnCommand("saga.applescript", ""), ["osascript", "saga.applescript"]);
   assertEquals(spawnCommand("run.sh", "#!/usr/bin/env bash"), ["bash", "run.sh"]);
   assertEquals(spawnCommand("run.sh", "#!/usr/bin/env zsh"), ["zsh", "run.sh"]);
 });
 
 Deno.test("both groups list scripts, and unknown groups list none", async () => {
-  for (const group of ["demo", "setup"]) {
+  for (const group of ["daily1", "setup", "demo"]) {
     const scripts = await listScripts(group);
     assertEquals(scripts.length > 0, true, group);
     for (const script of scripts) assertEquals(script.path.length > 0, true);

@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env -S deno run -A
 /**
  * Keyboard Maestro preferences worth setting on a fresh Mac.
  *
@@ -30,10 +30,11 @@
  *                   the way to find a key name rather than guess at it
  */
 import { fail, heading, info, ok, suggest, table, todo, type Row } from "../../_common.ts";
+import { spawn, exists, sleep, waitForEnter } from "../../_process.ts";
 
-const CHECK_ONLY = process.argv.includes("--check") || process.argv.includes("--dry-run");
-const NO_RESTART = process.argv.includes("--no-restart");
-const TRY_LOGIN_ITEM = process.argv.includes("--login-item");
+const CHECK_ONLY = Deno.args.includes("--check") || Deno.args.includes("--dry-run");
+const NO_RESTART = Deno.args.includes("--no-restart");
+const TRY_LOGIN_ITEM = Deno.args.includes("--login-item");
 
 const EDITOR_BUNDLE_ID = "com.stairways.keyboardmaestro.editor";
 const ENGINE_DOMAIN = "com.stairways.keyboardmaestro.engine";
@@ -67,7 +68,7 @@ interface Result {
  * script — a refused permission, a renamed window — explains itself there.
  */
 async function run(args: string[]): Promise<Result> {
-  const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });
+  const proc = spawn(args, { stdout: "pipe", stderr: "pipe" });
   const [out, err] = await Promise.all([
     new Response(proc.stdout).text(),
     new Response(proc.stderr).text(),
@@ -77,7 +78,7 @@ async function run(args: string[]): Promise<Result> {
 
 /** osascript hangs forever on a UI that never appears, so give it a deadline. */
 async function runWithTimeout(args: string[], ms: number): Promise<Result> {
-  const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });
+  const proc = spawn(args, { stdout: "pipe", stderr: "pipe" });
 
   const timer = setTimeout(() => proc.kill("SIGKILL"), ms);
   try {
@@ -131,9 +132,9 @@ function show(value: string | null): string {
 async function findApp(): Promise<string | null> {
   for (const path of [
     "/Applications/Keyboard Maestro.app",
-    `${process.env.HOME}/Applications/Keyboard Maestro.app`,
+    `${Deno.env.get("HOME")}/Applications/Keyboard Maestro.app`,
   ]) {
-    if (await Bun.file(`${path}/Contents/Info.plist`).exists()) return path;
+    if (exists(`${path}/Contents/Info.plist`)) return path;
   }
 
   const { code, out } = await run([
@@ -143,7 +144,7 @@ async function findApp(): Promise<string | null> {
   if (code !== 0 || !out) return null;
 
   const first = out.split("\n")[0]?.trim();
-  return first && (await Bun.file(`${first}/Contents/Info.plist`).exists()) ? first : null;
+  return first && (exists(`${first}/Contents/Info.plist`)) ? first : null;
 }
 
 async function appVersion(app: string): Promise<string> {
@@ -325,21 +326,11 @@ async function snapshot(domain: string): Promise<Map<string, string>> {
   }
 }
 
-function waitForEnter(): Promise<void> {
-  if (!process.stdin.isTTY) return Promise.resolve();
-  process.stdin.resume();
-  return new Promise<void>(resolve => {
-    process.stdin.once("data", () => {
-      process.stdin.pause();
-      resolve();
-    });
-  });
-}
 
-const watchIndex = process.argv.indexOf("--watch");
+const watchIndex = Deno.args.indexOf("--watch");
 
 if (watchIndex !== -1) {
-  const domain = process.argv[watchIndex + 1] ?? ENGINE_DOMAIN;
+  const domain = Deno.args[watchIndex + 1] ?? ENGINE_DOMAIN;
 
   heading(`Watching ${domain}`);
 
@@ -379,7 +370,7 @@ if (watchIndex !== -1) {
     table(["Key", "Was", "Now", ""], rows);
   }
 
-  process.exit(0);
+  Deno.exit(0);
 }
 
 /* ── System ────────────────────────────────────────────────────────────── */
@@ -393,7 +384,7 @@ if (!app) {
   info("Looked in /Applications, ~/Applications, and asked Spotlight for");
   info(EDITOR_BUNDLE_ID);
   suggest("brew install --cask keyboard-maestro");
-  process.exit(1);
+  Deno.exit(1);
 }
 
 const engineRunning = await isRunning(ENGINE_PROCESS);
@@ -437,8 +428,8 @@ if (CHECK_ONLY) {
   heading("Summary");
   info(`${pending.length} of ${SETTINGS.length} defaults differ.`);
   info("Launch Engine at Login is a UI control and is left to you either way.");
-  suggest("bun run setup-keyboard-maestro.ts   # to apply");
-  process.exit(0);
+  suggest("deno run -A setup-keyboard-maestro.ts   # to apply");
+  Deno.exit(0);
 }
 
 /* ── Apply ─────────────────────────────────────────────────────────────── */
@@ -459,7 +450,7 @@ if (pending.length > 0 && engineRunning && !NO_RESTART) {
   );
 
   for (let i = 0; i < 40 && (await isRunning(ENGINE_PROCESS)); i++) {
-    await Bun.sleep(100);
+    await sleep(100);
   }
 
   stoppedEngine = !(await isRunning(ENGINE_PROCESS));
@@ -486,12 +477,12 @@ if (pending.length === 0) info("Both defaults were already correct.");
 // Restart before touching the UI, so the preferences window reflects reality.
 if (stoppedEngine) {
   const engineApp = `${app}/Contents/MacOS/${ENGINE_PROCESS}.app`;
-  const relaunch = (await Bun.file(`${engineApp}/Contents/Info.plist`).exists())
+  const relaunch = (exists(`${engineApp}/Contents/Info.plist`))
     ? await run(["open", "-g", engineApp])
     : await run(["open", "-g", "-b", "com.stairways.keyboardmaestro.engine"]);
 
   for (let i = 0; i < 40 && !(await isRunning(ENGINE_PROCESS)); i++) {
-    await Bun.sleep(100);
+    await sleep(100);
   }
 
   if (await isRunning(ENGINE_PROCESS)) ok("Engine restarted");
@@ -559,5 +550,5 @@ info("Quit Keyboard Maestro first, or it will write its cached copy back over yo
 
 if (wrong.length > 0 || failed.length > 0 || loginItem.state === "failed") {
   if (wrong.length > 0) todo(`${wrong.length} setting(s) did not stick — see above`);
-  process.exit(1);
+  Deno.exit(1);
 }
