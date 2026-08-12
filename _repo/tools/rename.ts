@@ -1,6 +1,6 @@
 import { renameRepository } from "./lib/rename.ts";
-import { REPO_ROOT } from "./lib/paths.ts";
-import { ask, bold, dim, green, isInteractive, red } from "./lib/terminal.ts";
+import { REPO_ROOT } from "../../src/shared/paths.ts";
+import { ask, bold, dim, green, isInteractive, red } from "../../src/shared/terminal.ts";
 
 if (Deno.args.includes("--help") || Deno.args.includes("-h")) {
   console.log(`${bold("rename")} — give this repository a new project name

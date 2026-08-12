@@ -2,7 +2,7 @@
 
 A local script runbook: a Deno server that lists the scripts under `data/scripts/`, runs one on request, and streams its terminal output into the browser as it happens.
 
-Run it with `deno task dev`, then open <http://localhost:8000>. Add `--open` to launch a browser once the server responds.
+Run it with `deno task dev`, then open <http://localhost:8000>. While it is running, press `b` (default browser), `h` (Helium), `a` (Helium app mode), or `x` (exit) in the terminal.
 
 Two pages, one per script group — **demo** for short scripts that exercise output, errors and streaming, and **setup** for one-time machine setup steps. Each page exists in two frontend versions sharing a layout — a pinned index down the left edge, the console filling the rest — and differing in voice: `v1` is warm and typographic, `v2` is cool and instrumental, all mono and square-cornered, with a filter over the index. Both talk to the same API.
 
@@ -59,9 +59,7 @@ source view. No registration step — the server reads the directory each time.
 ```bash
 deno task choose       # interactive task list
 deno task check        # structural, format, lint, type, and test checks
-deno task skills       # inspect or repair agent skill links
-deno task dev          # run the app with file watching (--open opens a browser)
-deno task dev:open     # same, and open it in Helium
+deno task dev          # run the app with file watching (press b/h/a in terminal)
 deno task start        # run the app
 deno task rename       # rename the project after cloning
 ```

@@ -23,6 +23,11 @@ Release notes and write-ups live in [`_other/git/`](./git/).
 - `deno fmt`, `deno lint`, and the structural content checks skip `data/`, which holds content the repository runs but does not author.
 - The shipping-boundary check reads import specifiers rather than any mention of `_repo/`, so a comment naming a file is no longer a violation.
 - A directory URL without its trailing slash only redirects when the directory exists; a typo goes straight to its 404.
+- Repository consolidated under a single `src/` tree: `public/`, `tests/`, and the dev CLIs (`choose`, `check`, `dev`, `typecheck`) moved in from the root and `_repo/tools/`, with cross-cutting helpers gathered under `src/shared/` and the two `terminal.ts` files merged into one. See [ADR 0006](../_repo/adrs/0006-single-source-tree.md).
+
+### Removed
+
+- The agent skills system — `_repo/skills/`, `skills.json`, the `skills`/`skills:all`/`skills:check`/`skills:links` tasks, and the `.claude`/`.cursor`/`.agents` skill symlink farms — and the `.github/` CI workflow.
 
 <!--
 ## [0.1.0] — YYYY-MM-DD

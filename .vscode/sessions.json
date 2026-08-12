@@ -1,104 +1,104 @@
 {
-  "$schema": "https://cdn.statically.io/gh/nguyenngoclongdev/cdn/main/schema/v11/terminal-keeper.json",
-  "theme": "tribe",
-  "active": "t5",
-  "activateOnStartup": true,
-  "keepExistingTerminals": false,
-  "sessions": {
-    "t5": [
-      {
-        "name": "t5",
-        "autoExecuteCommands": true,
-        "icon": "smiley",
-        "color": "terminal.ansiGreen",
-        "commands": [
-          "echo hello t5!"
+    "$schema": "https://cdn.statically.io/gh/nguyenngoclongdev/cdn/main/schema/v11/terminal-keeper.json",
+    "theme": "tribe",
+    "active": "t5",
+    "activateOnStartup": true,
+    "keepExistingTerminals": false,
+    "sessions": {
+        "t5": [
+            {
+                "name": "t5",
+                "autoExecuteCommands": true,
+                "icon": "smiley",
+                "color": "terminal.ansiGreen",
+                "commands": [
+                    "echo hello t5!"
+                ]
+            },
+            {
+                "name": "sonnet (low)",
+                "autoExecuteCommands": false,
+                "icon": "code",
+                "color": "terminal.ansiRed",
+                "commands": [
+                    "claude --effort low --model sonnet \"/git-commit-ascii create a 2 line wordart banner\""
+                ]
+            },
+            {
+                "name": "sonnet (high)",
+                "autoExecuteCommands": false,
+                "icon": "code",
+                "color": "terminal.ansiRed",
+                "commands": [
+                    "claude --effort high --model opusplan"
+                ]
+            },
+            {
+                "name": "opencode glm-5.2",
+                "autoExecuteCommands": false,
+                "icon": "versions",
+                "color": "terminal.ansiRed",
+                "commands": [
+                    "opencode --model zai-coding-plan/glm-5.2"
+                ]
+            },
+            {
+                "name": "hermes",
+                "autoExecuteCommands": false,
+                "icon": "hubot",
+                "color": "terminal.ansiMagenta",
+                "commands": [
+                    "hermes"
+                ]
+            },
+            {
+                "name": "codex",
+                "autoExecuteCommands": false,
+                "icon": "file-code",
+                "color": "terminal.ansiBlue",
+                "commands": [
+                    "codex"
+                ]
+            },
+            [
+                {
+                    "name": "root",
+                    "autoExecuteCommands": true,
+                    "icon": "terminal",
+                    "color": "terminal.ansiGreen",
+                    "commands": [
+                        "echo split pane - workspace root"
+                    ]
+                },
+                {
+                    "name": ".vscode",
+                    "autoExecuteCommands": true,
+                    "icon": "folder-opened",
+                    "color": "terminal.ansiCyan",
+                    "commands": [
+                        "echo split pane - .vscode",
+                        "cd .vscode"
+                    ]
+                }
+            ],
+            {
+                "name": "just",
+                "autoExecuteCommands": true,
+                "icon": "folder-opened",
+                "color": "terminal.ansiCyan",
+                "commands": [
+                    "just"
+                ]
+            },
+            {
+                "name": "deno choose",
+                "autoExecuteCommands": true,
+                "icon": "checklist",
+                "color": "terminal.ansiYellow",
+                "commands": [
+                    "deno task choose"
+                ]
+            }
         ]
-      },
-      {
-        "name": "sonnet (low)",
-        "autoExecuteCommands": false,
-        "icon": "code",
-        "color": "terminal.ansiRed",
-        "commands": [
-          "claude --effort low --model sonnet \"/git-commit-ascii use wordart\""
-        ]
-      },
-      {
-        "name": "sonnet (high)",
-        "autoExecuteCommands": false,
-        "icon": "code",
-        "color": "terminal.ansiRed",
-        "commands": [
-          "claude --effort high --model opusplan"
-        ]
-      },
-      {
-        "name": "opencode glm-5.2",
-        "autoExecuteCommands": false,
-        "icon": "versions",
-        "color": "terminal.ansiRed",
-        "commands": [
-          "opencode --model zai-coding-plan/glm-5.2"
-        ]
-      },
-      {
-        "name": "hermes",
-        "autoExecuteCommands": false,
-        "icon": "hubot",
-        "color": "terminal.ansiMagenta",
-        "commands": [
-          "hermes"
-        ]
-      },
-      {
-        "name": "codex",
-        "autoExecuteCommands": false,
-        "icon": "file-code",
-        "color": "terminal.ansiBlue",
-        "commands": [
-          "codex"
-        ]
-      },
-      [
-        {
-          "name": "root",
-          "autoExecuteCommands": true,
-          "icon": "terminal",
-          "color": "terminal.ansiGreen",
-          "commands": [
-            "echo split pane - workspace root"
-          ]
-        },
-        {
-          "name": ".vscode",
-          "autoExecuteCommands": true,
-          "icon": "folder-opened",
-          "color": "terminal.ansiCyan",
-          "commands": [
-            "echo split pane - .vscode",
-            "cd .vscode"
-          ]
-        }
-      ],
-      {
-        "name": "just",
-        "autoExecuteCommands": true,
-        "icon": "folder-opened",
-        "color": "terminal.ansiCyan",
-        "commands": [
-          "just"
-        ]
-      },
-      {
-        "name": "deno choose",
-        "autoExecuteCommands": true,
-        "icon": "checklist",
-        "color": "terminal.ansiYellow",
-        "commands": [
-          "deno task choose"
-        ]
-      }
-    ]
-  }
+    }
 }

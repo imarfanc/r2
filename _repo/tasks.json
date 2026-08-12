@@ -9,10 +9,6 @@
       "group": "run",
       "description": "Run the web app with file watching"
     },
-    "dev:open": {
-      "group": "run",
-      "description": "Run the web app and open it in Helium"
-    },
     "start": {
       "group": "run",
       "description": "Run the web app"
@@ -36,22 +32,6 @@
     "test": {
       "group": "check",
       "description": "Run Deno tests"
-    },
-    "skills": {
-      "group": "repo",
-      "description": "Preview and interactively reconcile skill links"
-    },
-    "skills:all": {
-      "group": "repo",
-      "description": "Apply the skill manifest"
-    },
-    "skills:check": {
-      "group": "repo",
-      "description": "Fail when skill links drift"
-    },
-    "skills:links": {
-      "group": "repo",
-      "description": "List managed skill links"
     },
     "rename": {
       "group": "repo",

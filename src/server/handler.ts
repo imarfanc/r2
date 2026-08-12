@@ -4,7 +4,7 @@ import { health } from "../app/health.ts";
 import { scriptRoutes } from "../app/scripts.ts";
 import { assetPath, contentType } from "./static.ts";
 
-const FRONTEND_ROOT = new URL("../../public/frontends/", import.meta.url);
+const FRONTEND_ROOT = new URL("../public/frontends/", import.meta.url);
 
 export async function handler(request: Request): Promise<Response> {
   const { pathname } = new URL(request.url);

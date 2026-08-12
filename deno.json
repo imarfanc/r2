@@ -9,19 +9,14 @@
     "@tui/input-types": "https://deno.land/x/tui@2.1.4/src/input_reader/types.ts"
   },
   "tasks": {
-    "choose": "deno run -A _repo/tools/choose.ts",
-    "check": "deno run -A _repo/tools/check.ts",
+    "choose": "deno run -A src/tools/choose.ts",
+    "check": "deno run -A src/tools/check.ts",
     "fmt": "deno fmt",
     "fmt:check": "deno fmt --check",
     "lint": "deno lint",
-    "typecheck": "deno run -A _repo/tools/typecheck.ts",
+    "typecheck": "deno run -A src/tools/typecheck.ts",
     "test": "deno test -A",
-    "skills": "deno run -A _repo/tools/skills.ts",
-    "skills:all": "deno run -A _repo/tools/skills.ts --apply",
-    "skills:check": "deno run -A _repo/tools/skills.ts --check",
-    "skills:links": "deno run -A _repo/tools/skills.ts --links",
-    "dev": "deno run -A _repo/tools/dev.ts",
-    "dev:open": "deno run -A _repo/tools/dev.ts --open",
+    "dev": "deno run -A src/tools/dev.ts",
     "start": "deno run -A src/main.ts",
     "rename": "deno run -A _repo/tools/rename.ts",
     "git:history": "deno run -A _repo/tools/git-history.ts"
@@ -36,7 +31,6 @@
     "lineWidth": 100,
     "proseWrap": "preserve",
     "exclude": [
-      "_repo/skills/**/browser-tools/**",
       ".vscode/sessions.json",
       "_other/git/**",
       "data/scripts/**"
@@ -49,7 +43,6 @@
       ]
     },
     "exclude": [
-      "_repo/skills/**/browser-tools/**",
       ".vscode/sessions.json",
       "data/scripts/**"
     ]

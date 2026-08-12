@@ -1,4 +1,4 @@
-import { run } from "./process.ts";
+import { run } from "../../../src/shared/process.ts";
 
 /** One commit, as read from `git log` with record separators we control. */
 export interface Commit {

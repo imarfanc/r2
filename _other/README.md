@@ -4,8 +4,8 @@ Everything that would otherwise clutter the repository root lives here: notes, d
 
 ## For agents
 
-- Prefer a subfolder of `_other/` over a new top-level directory. The root is deliberately small: `src/`, `public/`, `tests/`, `_repo/`, `_other/`, and the required root files.
-- `_repo/` is different: it holds trusted machinery wired into `deno task` (checks, the task picker, skills, ADRs). Anything not wired into a task belongs in `_other/`.
+- Prefer a subfolder of `_other/` over a new top-level directory. The root is deliberately small: `src/`, `data/`, `_repo/`, `_other/`, and the required root files.
+- `_repo/` is different: it holds trusted machinery wired into `deno task` (checks, the task picker, ADRs). Anything not wired into a task belongs in `_other/`.
 - Nothing under `_other/` may be imported by `src/`, and nothing here may be required for the application to start.
 - `_other/temp/` is ignored by Git; use it for scratch output and never for anything durable.
 - Every folder here keeps a short `README.md` saying what belongs in it. Add one when you add a folder.

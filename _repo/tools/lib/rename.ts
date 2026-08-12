@@ -1,8 +1,8 @@
 import { join } from "@std/path";
 
-import { readJson, writeJson } from "./config.ts";
-import { fileExists } from "./fs.ts";
-import type { RepoState } from "./types.ts";
+import { readJson, writeJson } from "../../../src/shared/json.ts";
+import { fileExists } from "../../../src/shared/fs.ts";
+import type { RepoState } from "../../../src/shared/types.ts";
 
 export interface RenameEdit {
   path: string;

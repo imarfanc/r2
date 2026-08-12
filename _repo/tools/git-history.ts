@@ -1,8 +1,8 @@
 import { isAbsolute, join } from "@std/path";
 
 import { readCommits, renderHistory, renderMessages } from "./lib/git-history.ts";
-import { relativeRepoPath, REPO_ROOT } from "./lib/paths.ts";
-import { bold, dim, green, red } from "./lib/terminal.ts";
+import { relativeRepoPath, REPO_ROOT } from "../../src/shared/paths.ts";
+import { bold, dim, green, red } from "../../src/shared/terminal.ts";
 
 if (Deno.args.includes("--help") || Deno.args.includes("-h")) {
   console.log(`${bold("git:history")} — write commit history to Markdown files
