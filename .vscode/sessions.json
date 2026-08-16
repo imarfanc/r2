@@ -21,7 +21,7 @@
                 "icon": "code",
                 "color": "terminal.ansiRed",
                 "commands": [
-                    "claude --effort low --model sonnet \"/git-commit-ascii create a 2 line wordart banner\""
+                    "claude --effort low --model sonnet \"/git-commit-ascii create a 2 line wordart banner, when done run 'deno task choose git:history' and then add the 2 new files into the existing commit, if that makes sense and if not ask me\""
                 ]
             },
             {
